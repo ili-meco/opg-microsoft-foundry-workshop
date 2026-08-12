@@ -34,8 +34,10 @@ def required_environment(variable: str) -> str:
 def request_model_response(client: OpenAI, model_name: str, request: str) -> str:
     """Return one model response for the supplied maintenance request."""
     # TODO 1: Call client.responses.create().
-    # TODO 2: Pass model_name, SYSTEM_INSTRUCTIONS, and request.
-    # TODO 3: Return response.output_text.
+    # TODO 2: Pass model_name as model to select the Foundry deployment.
+    # TODO 3: Pass SYSTEM_INSTRUCTIONS as instructions to define model behavior.
+    # TODO 4: Pass request as input to supply the maintenance observation.
+    # TODO 5: Return response.output_text so the caller can print the generated text.
     raise NotImplementedError("Complete request_model_response() using the TODOs above.")
 
 

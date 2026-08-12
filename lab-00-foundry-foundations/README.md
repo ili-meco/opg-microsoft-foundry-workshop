@@ -34,9 +34,9 @@ By the end of this lab, you can:
 ## Prerequisites
 
 - Python 3.11 or newer, Git, VS Code, and Azure CLI.
-- Access to the instructor-provided OPG workshop project.
-- `Foundry User` on your assigned project.
-- At least one model deployment created by the workshop administrator.
+- Access to your own Azure subscription and Microsoft Foundry project.
+- `Foundry User` or equivalent model-inference access on your project.
+- At least one model deployment in that project.
 - The root setup script completed successfully.
 
 ## Step 1: Verify Local Setup
@@ -58,13 +58,19 @@ az account show --output table
 python .\scripts\verify_setup.py --azure
 ```
 
-Confirm that the tenant and subscription are the workshop values supplied by the instructor.
+Confirm that Azure CLI is using the tenant and subscription that contain your Foundry project. If you have access to multiple subscriptions, select the correct one before continuing:
+
+```powershell
+az account list --output table
+az account set --subscription "<your-subscription-name-or-id>"
+az account show --output table
+```
 
 ## Step 3: Explore the Foundry Project
 
-In the Microsoft Foundry portal:
+In the Microsoft Foundry portal, open the project in your Azure subscription:
 
-1. Open your assigned team project.
+1. Open your Foundry project.
 2. Locate the project endpoint. It has the form `https://<account>.services.ai.azure.com/api/projects/<project>`.
 3. Open the deployed-model list and record the deployment name in the **Name** column.
 4. Open the model playground and run the maintenance request below.
@@ -88,23 +94,43 @@ FOUNDRY_COMPARISON_MODEL_NAME=<optional-second-deployment>
 
 Use deployment names, not model catalog labels. Do not add API keys.
 
+### Keep Workshop Model Costs Low
+
+Use a small, low-cost model deployment that supports the Responses API and is available in your region. For example, choose a `mini` or `nano` model such as GPT-4.1-mini or GPT-4.1-nano when it meets the exercise requirements. Model availability and pricing vary by subscription and region, so confirm the current price before deployment.
+
+Configure only `FOUNDRY_MODEL_NAME` for the first run. Leave `FOUNDRY_COMPARISON_MODEL_NAME` empty unless you specifically want to compare two deployments; setting it causes every execution to make a second billable model call. Use the short synthetic request provided by the lab, avoid repeatedly rerunning unchanged prompts, and delete deployments you no longer need after the workshop.
+
 ## Step 5: Complete the Python Client
 
-Open `starter/foundry_model_check.py` and implement `request_model_response()` by following its TODOs:
+In VS Code, open `lab-00-foundry-foundations/starter/foundry_model_check.py` and implement `request_model_response()` by following its TODOs:
 
-1. Call `client.responses.create()`.
-2. Pass the deployment name as `model`.
-3. Pass `SYSTEM_INSTRUCTIONS` as `instructions`.
-4. Pass the maintenance request as `input`.
-5. Return `response.output_text`.
+1. **Call `client.responses.create()`.** This sends an inference request through the project-scoped OpenAI client. The client already carries the Foundry endpoint and Microsoft Entra authentication configured in `main()`.
+2. **Pass `model_name` as `model`.** Foundry routes the request to this deployment. The value must be the deployment name from your project, not merely the model-family name shown in the catalog.
+3. **Pass `SYSTEM_INSTRUCTIONS` as `instructions`.** These instructions define the assistant's role, expected answer organization, uncertainty behavior, and safety boundary independently from the user's request.
+4. **Pass `request` as `input`.** This is the task-specific maintenance observation the model must assess. Keeping it separate from the system instructions makes the control boundary visible.
+5. **Return `response.output_text`.** The Responses API can return several structured output items; `output_text` is the SDK convenience property that combines the generated text into the string this command prints.
 
-Run the client from the repository root:
+### Run Your Starter
+
+Open a VS Code terminal with the repository root as its current directory. The prompt should end with `OPG>`. Activate the virtual environment, then run your completed starter file:
 
 ```powershell
+cd "C:\path\to\OPG"
+.\.venv\Scripts\Activate.ps1
 python .\lab-00-foundry-foundations\starter\foundry_model_check.py
 ```
 
-If you are blocked, compare your implementation with `solution/foundry_model_check.py` and continue.
+Replace `C:\path\to\OPG` with the folder where you cloned the repository. If your terminal is already at the repository root and the virtual environment is active, run only the final `python` command.
+
+### Run the Completed Solution
+
+If you are blocked, compare your implementation with `lab-00-foundry-foundations/solution/foundry_model_check.py`. You can also run the completed reference implementation from the same repository-root terminal:
+
+```powershell
+python .\lab-00-foundry-foundations\solution\foundry_model_check.py
+```
+
+The starter command runs the file you edit. The solution command runs the completed reference version. Both read the same root `.env` file and call the configured Foundry deployment.
 
 ## Step 6: Compare Models
 
