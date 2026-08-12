@@ -2,6 +2,8 @@
 
 Build an enterprise Work Order Maintenance Assistant progressively through a full day of hands-on labs. The solution begins with a model invocation, then adds structured outputs, deterministic business tools, Azure AI Search and Foundry IQ grounding, multi-agent safety review, tracing, and evaluation.
 
+See the [complete workshop outcome architecture](ARCHITECTURE.md) for the end-state component map, runtime flow, trust boundaries, and lab-by-lab build sequence.
+
 ## Ready Labs
 
 ### Lab 00: Foundry Foundations and Model Access
