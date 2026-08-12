@@ -14,10 +14,18 @@ MINIMUM_PYTHON = (3, 11)
 REQUIRED_MODULES = {
     "azure.ai.projects": "azure-ai-projects",
     "azure.identity": "azure-identity",
+    "azure.search.documents": "azure-search-documents",
     "dotenv": "python-dotenv",
     "openai": "openai",
+    "requests": "requests",
 }
 REQUIRED_ENVIRONMENT = ("FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL_NAME")
+LAB_03_ENVIRONMENT = (
+    "FOUNDRY_PROJECT_RESOURCE_ID",
+    "AZURE_SEARCH_ENDPOINT",
+    "AZURE_OPENAI_ENDPOINT",
+    "FOUNDRY_EMBEDDING_MODEL_NAME",
+)
 
 
 @dataclass(frozen=True)
@@ -74,9 +82,11 @@ def load_environment_file() -> None:
         load_dotenv()
 
 
-def configuration_checks() -> list[CheckResult]:
+def configuration_checks(
+    variables: tuple[str, ...] = REQUIRED_ENVIRONMENT,
+) -> list[CheckResult]:
     results = []
-    for variable in REQUIRED_ENVIRONMENT:
+    for variable in variables:
         value = os.getenv(variable, "").strip()
         results.append(
             CheckResult(
@@ -120,10 +130,16 @@ def main() -> int:
         action="store_true",
         help="Also verify that Azure CLI has an active signed-in account.",
     )
+    parser.add_argument(
+        "--lab-03",
+        action="store_true",
+        help="Also verify the Azure AI Search and Foundry IQ configuration.",
+    )
     args = parser.parse_args()
 
     load_environment_file()
-    results = [*local_checks(), *configuration_checks()]
+    configuration = REQUIRED_ENVIRONMENT + (LAB_03_ENVIRONMENT if args.lab_03 else ())
+    results = [*local_checks(), *configuration_checks(configuration)]
     if args.azure:
         results.append(azure_login_check())
 

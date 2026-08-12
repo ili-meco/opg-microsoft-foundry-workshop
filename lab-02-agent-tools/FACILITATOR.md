@@ -1,0 +1,26 @@
+# Lab 02 Facilitator Guide
+
+## Teaching Flow
+
+| Time | Activity |
+|---|---|
+| 0-10 minutes | Inspect data and distinguish model knowledge from system facts |
+| 10-25 minutes | Implement validated lookup functions and result envelopes |
+| 25-40 minutes | Define strict schemas and complete the Responses tool loop |
+| 40-52 minutes | Run offline tests and the Foundry solution |
+| 52-60 minutes | Test refusal boundaries and debrief authorization |
+
+## Demonstration Checkpoint
+
+Run the solution request for `ASSET-104`. The console should show one asset lookup and inventory lookups for `PART-200` and `PART-310`. Tool-call order is model-dependent; correctness requires handling every call, not a fixed order.
+
+## Recovery Paths
+
+- If Azure access is blocked, run the ten offline tests and inspect captured function outputs.
+- If the agent returns a function call but no final answer, confirm outputs are submitted with the same conversation ID.
+- If only one part is checked, confirm the loop processes all output items and permits another tool-call round.
+- If an agent version remains after interruption, delete it from the Foundry portal.
+
+## Safety Boundary
+
+The tools are intentionally read-only. Do not replace the synthetic JSON files with production APIs during the workshop. A future write tool requires authenticated end-user context, explicit authorization, idempotency, audit logging, and an approval step.

@@ -1,0 +1,35 @@
+[
+  {
+    "asset_id": "ASSET-100",
+    "name": "Cooling Water Pump A",
+    "asset_type": "centrifugal_pump",
+    "site": "North Hydro Station",
+    "location": "Unit 2 auxiliary bay",
+    "operating_status": "running",
+    "criticality": "high",
+    "last_service_date": "2026-07-14",
+    "installed_part_numbers": ["PART-200", "PART-310"]
+  },
+  {
+    "asset_id": "ASSET-104",
+    "name": "Cooling Water Pump B",
+    "asset_type": "centrifugal_pump",
+    "site": "North Hydro Station",
+    "location": "Unit 2 auxiliary bay",
+    "operating_status": "maintenance_required",
+    "criticality": "high",
+    "last_service_date": "2026-03-02",
+    "installed_part_numbers": ["PART-200", "PART-310"]
+  },
+  {
+    "asset_id": "ASSET-220",
+    "name": "Service Air Compressor 1",
+    "asset_type": "rotary_screw_compressor",
+    "site": "East Thermal Station",
+    "location": "Compressor room",
+    "operating_status": "standby",
+    "criticality": "medium",
+    "last_service_date": "2026-06-21",
+    "installed_part_numbers": ["PART-450"]
+  }
+]

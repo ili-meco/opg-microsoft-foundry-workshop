@@ -1,8 +1,8 @@
 # OPG Microsoft Foundry Workshop
 
-Build an enterprise Work Order Maintenance Assistant progressively through a full day of hands-on labs. The solution begins with a model invocation, then adds structured outputs, maintenance grounding, business tools, multi-agent safety review, tracing, and evaluation.
+Build an enterprise Work Order Maintenance Assistant progressively through a full day of hands-on labs. The solution begins with a model invocation, then adds structured outputs, deterministic business tools, Azure AI Search and Foundry IQ grounding, multi-agent safety review, tracing, and evaluation.
 
-## Current Lab
+## Ready Labs
 
 ### Lab 00: Foundry Foundations and Model Access
 
@@ -10,14 +10,17 @@ Connect to an instructor-provided Microsoft Foundry project using Microsoft Entr
 
 Start with [Lab 00](lab-00-foundry-foundations/README.md).
 
+- [Lab 02: Deterministic Agent Tools](lab-02-agent-tools/README.md)
+- [Lab 03: Azure AI Search and Foundry IQ Grounding](lab-03-search-grounding/README.md)
+
 ## Repository Status
 
 | Lab | Topic | Status |
 |---|---|---|
 | 00 | Foundry foundations and model access | Ready |
 | 01 | Prompt engineering and structured outputs | Planned |
-| 02 | Grounding with Azure AI Search | Planned |
-| 03 | Agent tools and work-order workflow | Planned |
+| 02 | Deterministic agent tools and work-order lookups | Ready |
+| 03 | Azure AI Search and Foundry IQ grounding | Ready |
 | 04 | Multi-agent safety review | Planned |
 | 05 | Tracing, evaluation, and promotion | Planned |
 

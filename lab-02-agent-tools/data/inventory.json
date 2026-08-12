@@ -1,0 +1,32 @@
+[
+  {
+    "part_number": "PART-200",
+    "description": "Pump bearing kit",
+    "quantity_on_hand": 6,
+    "reorder_point": 4,
+    "stock_status": "available",
+    "storeroom": "NHS-MRO-01",
+    "lead_time_days": 5,
+    "compatible_asset_types": ["centrifugal_pump"]
+  },
+  {
+    "part_number": "PART-310",
+    "description": "Mechanical seal kit",
+    "quantity_on_hand": 1,
+    "reorder_point": 2,
+    "stock_status": "low_stock",
+    "storeroom": "NHS-MRO-01",
+    "lead_time_days": 14,
+    "compatible_asset_types": ["centrifugal_pump"]
+  },
+  {
+    "part_number": "PART-450",
+    "description": "Compressor oil separator",
+    "quantity_on_hand": 0,
+    "reorder_point": 1,
+    "stock_status": "out_of_stock",
+    "storeroom": "ETS-MRO-02",
+    "lead_time_days": 21,
+    "compatible_asset_types": ["rotary_screw_compressor"]
+  }
+]
