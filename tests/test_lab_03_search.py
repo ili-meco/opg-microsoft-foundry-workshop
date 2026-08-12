@@ -83,15 +83,15 @@ class SearchSchemaTests(unittest.TestCase):
         source_payload = captured["source"].as_dict()
         base_payload = captured["base"].as_dict()
         self.assertEqual(
-            source_payload["search_index_parameters"]["search_index_name"],
+            source_payload["searchIndexParameters"]["searchIndexName"],
             "maintenance-index",
         )
         self.assertEqual(
-            source_payload["search_index_parameters"]["semantic_configuration_name"],
+            source_payload["searchIndexParameters"]["semanticConfigurationName"],
             search_helpers.SEMANTIC_CONFIGURATION_NAME,
         )
-        self.assertEqual(base_payload["knowledge_sources"][0]["name"], "maintenance-source")
-        self.assertEqual(base_payload["output_mode"], "extractiveData")
+        self.assertEqual(base_payload["knowledgeSources"][0]["name"], "maintenance-source")
+        self.assertNotIn("output_mode", base_payload)
 
 
 class QueryModeTests(unittest.TestCase):
@@ -106,6 +106,7 @@ class QueryModeTests(unittest.TestCase):
 
         self.assertIsNone(arguments["search_text"])
         self.assertEqual(arguments["vector_queries"][0].fields, "content_vector")
+        self.assertEqual(arguments["vector_queries"][0].k_nearest_neighbors, 3)
 
     def test_hybrid_query_combines_text_vector_and_semantic_ranking(self) -> None:
         arguments = search_helpers.build_query_arguments("seal leak", "hybrid")

@@ -95,8 +95,8 @@ flowchart LR
 | Foundry agent layer | Decide when to reason, retrieve evidence, or request deterministic tools | Prompt agents through Responses and Conversations APIs |
 | Operational tools | Return current structured facts from governed systems | Synthetic asset and inventory JSON behind read-only functions |
 | Knowledge layer | Retrieve relevant procedural evidence with source references | Azure AI Search index plus Foundry IQ knowledge source and knowledge base |
-| Safety layer | Review recommendations for unsupported claims and unsafe actions | Planned specialist reviewer agent and approval checkpoint |
-| Quality layer | Capture behavior, run evaluations, and decide whether a version can be promoted | Planned tracing, evaluation dataset, graders, and promotion criteria |
+| Safety layer | Review recommendations for unsupported claims and unsafe actions | MAF planner/reviewer workflow plus deterministic approval checkpoint |
+| Quality layer | Capture behavior, run evaluations, and decide whether a version can be promoted | MAF OpenTelemetry tracing, six-case regression dataset, deterministic evaluators, and promotion criteria |
 | Identity layer | Authenticate people and managed services without application keys | Microsoft Entra ID, `DefaultAzureCredential`, managed identities, and Azure RBAC |
 
 ## Runtime Request Flow
@@ -165,11 +165,11 @@ flowchart LR
 | Lab | Capability added | Concrete outcome | Status |
 |---|---|---|---|
 | 00 | Authenticate and invoke a deployed model | Working Foundry project client and model baseline | Ready |
-| 01 | Constrain model behavior | Validated maintenance-assessment response contract | Planned |
+| 01 | Constrain model behavior | Validated maintenance-assessment response contract | Ready |
 | 02 | Use current business facts | Strict function schemas, closed dispatch, and read-only asset/inventory lookups | Ready |
 | 03 | Ground answers in enterprise evidence | Search index, keyword/vector/hybrid comparison, Foundry IQ knowledge base, citations, and MCP connection | Ready |
-| 04 | Separate recommendation from safety authorization | Reviewer agent, escalation rules, and human approval checkpoint | Planned |
-| 05 | Measure behavior before promotion | Traces, test dataset, evaluators, quality thresholds, and promotion decision | Planned |
+| 04 | Separate recommendation from safety authorization | MAF reviewer agent, escalation rules, and human approval checkpoint | Ready |
+| 05 | Measure behavior before promotion | OpenTelemetry traces, test dataset, evaluators, quality thresholds, and promotion decision | Ready |
 
 Labs 02 and 03 deliberately teach separate mechanisms:
 

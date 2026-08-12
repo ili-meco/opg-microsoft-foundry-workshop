@@ -108,7 +108,7 @@ python .\lab-03-search-grounding\solution\02_foundry_iq_agent.py
 The script creates or updates:
 
 1. A Search index knowledge source.
-2. A knowledge base in `extractiveData` mode.
+2. A knowledge base that references the workshop knowledge source.
 3. A Foundry `RemoteTool` project connection to the knowledge-base MCP endpoint.
 4. A temporary prompt-agent version with only `knowledge_base_retrieve` allowed.
 

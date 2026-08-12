@@ -6,25 +6,25 @@ See the [complete workshop outcome architecture](ARCHITECTURE.md) for the end-st
 
 ## Ready Labs
 
-### Lab 00: Foundry Foundations and Model Access
+Complete the labs in order. Each stage adds one explicit capability and control boundary to the same maintenance-assistant scenario.
 
-Connect to an instructor-provided Microsoft Foundry project using Microsoft Entra ID, invoke an approved model deployment from Python, and compare model behavior in code and the Foundry playground.
-
-Start with [Lab 00](lab-00-foundry-foundations/README.md).
-
+- [Lab 00: Foundry Foundations and Model Access](lab-00-foundry-foundations/README.md)
+- [Lab 01: Prompting and Structured Outputs](lab-01-prompting-structured-output/README.md)
 - [Lab 02: Deterministic Agent Tools](lab-02-agent-tools/README.md)
 - [Lab 03: Azure AI Search and Foundry IQ Grounding](lab-03-search-grounding/README.md)
+- [Lab 04: Multi-Agent Safety Review and Human Approval](lab-04-multi-agent-safety/README.md)
+- [Lab 05: Tracing, Evaluation, and Promotion](lab-05-observability-evaluation/README.md)
 
 ## Repository Status
 
 | Lab | Topic | Status |
 |---|---|---|
 | 00 | Foundry foundations and model access | Ready |
-| 01 | Prompt engineering and structured outputs | Planned |
+| 01 | Prompt engineering and structured outputs | Ready |
 | 02 | Deterministic agent tools and work-order lookups | Ready |
 | 03 | Azure AI Search and Foundry IQ grounding | Ready |
-| 04 | Multi-agent safety review | Planned |
-| 05 | Tracing, evaluation, and promotion | Planned |
+| 04 | Multi-agent safety review and human approval | Ready |
+| 05 | Tracing, evaluation, and promotion | Ready |
 
 ## Quick Setup
 
@@ -42,6 +42,14 @@ chmod +x scripts/setup.sh
 ```
 
 The scripts create `.venv`, install the pinned dependencies, create `.env` from `.env.example` when needed, and run the local prerequisite checks.
+
+Run the complete offline regression suite at any time:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+Azure-backed scripts require the values documented in `.env.example`. Lab 05's deterministic promotion gate runs offline; its traced workflow requires Foundry Toolkit's trace receiver when you want to visualize spans.
 
 ## Authentication
 

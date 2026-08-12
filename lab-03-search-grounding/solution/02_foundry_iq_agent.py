@@ -17,7 +17,6 @@ from azure.search.documents.indexes.models import (
     SearchIndexKnowledgeSource,
     SearchIndexKnowledgeSourceParameters,
 )
-from azure.search.documents.knowledgebases.models import KnowledgeRetrievalMinimalReasoningEffort
 from dotenv import load_dotenv
 
 from search_helpers import SEMANTIC_CONFIGURATION_NAME
@@ -79,8 +78,6 @@ def create_knowledge_objects(
         name=knowledge_base_name,
         description="Workshop knowledge base for maintenance grounding.",
         knowledge_sources=[KnowledgeSourceReference(name=knowledge_source_name)],
-        output_mode="extractiveData",
-        retrieval_reasoning_effort=KnowledgeRetrievalMinimalReasoningEffort(),
     )
     index_client.create_or_update_knowledge_base(knowledge_base)
 

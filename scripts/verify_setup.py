@@ -12,11 +12,16 @@ from dataclasses import dataclass
 
 MINIMUM_PYTHON = (3, 11)
 REQUIRED_MODULES = {
+    "agent_framework": "agent-framework-core",
+    "agent_framework.openai": "agent-framework-openai",
+    "agent_framework.orchestrations": "agent-framework-orchestrations",
     "azure.ai.projects": "azure-ai-projects",
     "azure.identity": "azure-identity",
     "azure.search.documents": "azure-search-documents",
     "dotenv": "python-dotenv",
     "openai": "openai",
+    "opentelemetry.exporter.otlp.proto.grpc": "opentelemetry-exporter-otlp-proto-grpc",
+    "pydantic": "pydantic",
     "requests": "requests",
 }
 REQUIRED_ENVIRONMENT = ("FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL_NAME")

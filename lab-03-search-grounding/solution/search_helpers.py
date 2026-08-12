@@ -154,7 +154,11 @@ def build_query_arguments(query: str, mode: str, top: int = 3) -> dict[str, Any]
     }
     if mode in {"vector", "hybrid"}:
         arguments["vector_queries"] = [
-            VectorizableTextQuery(text=query, k=top, fields="content_vector")
+            VectorizableTextQuery(
+                text=query,
+                k_nearest_neighbors=top,
+                fields="content_vector",
+            )
         ]
     if mode == "hybrid":
         arguments.update(
