@@ -6,6 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 SOLUTION_DIRECTORY = (
@@ -78,6 +79,16 @@ class FunctionCallResolutionTests(unittest.TestCase):
         self.assertEqual([tool.name for tool in tools], ["get_asset", "get_parts_inventory"])
         self.assertTrue(all(tool.strict for tool in tools))
         self.assertTrue(all(tool.parameters["additionalProperties"] is False for tool in tools))
+
+    def test_terminal_input_retries_blank_and_accepts_exit(self) -> None:
+        with (
+            patch("builtins.input", side_effect=[" ", "Check ASSET-104."]),
+            patch("builtins.print"),
+        ):
+            self.assertEqual(maintenance_agent.read_request(), "Check ASSET-104.")
+
+        with patch("builtins.input", return_value="exit"):
+            self.assertIsNone(maintenance_agent.read_request())
 
 
 if __name__ == "__main__":

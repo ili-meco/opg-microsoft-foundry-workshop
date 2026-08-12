@@ -5,6 +5,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 SOLUTION_FILE = (
@@ -13,6 +14,7 @@ SOLUTION_FILE = (
     / "solution"
     / "maintenance_assessment.py"
 )
+SOLUTION_RUNNER_FILE = SOLUTION_FILE.with_name("run_assessment.py")
 
 
 def load_module(name: str, path: Path):
@@ -25,6 +27,7 @@ def load_module(name: str, path: Path):
 
 
 maintenance_assessment = load_module("maintenance_assessment", SOLUTION_FILE)
+run_assessment = load_module("lab_01_run_assessment", SOLUTION_RUNNER_FILE)
 
 
 class FakeResponses:
@@ -89,6 +92,16 @@ class StructuredAssessmentTests(unittest.TestCase):
                 "gpt-4.1-mini",
                 "Assess an asset.",
             )
+
+    def test_terminal_input_retries_blank_and_accepts_exit(self) -> None:
+        with (
+            patch("builtins.input", side_effect=[" ", "Assess ASSET-104."]),
+            patch("builtins.print"),
+        ):
+            self.assertEqual(run_assessment.read_request(), "Assess ASSET-104.")
+
+        with patch("builtins.input", return_value="exit"):
+            self.assertIsNone(run_assessment.read_request())
 
 
 if __name__ == "__main__":

@@ -12,11 +12,11 @@
 
 ## Demonstration Checkpoint
 
-Run the solution request for `ASSET-104`. The console should show one asset lookup and inventory lookups for `PART-200` and `PART-310`. Tool-call order is model-dependent; correctness requires handling every call, not a fixed order.
+Enter the documented `ASSET-104` request in the solution terminal loop. The console should show one asset lookup and inventory lookups for `PART-200` and `PART-310`. Tool-call order is model-dependent; correctness requires handling every call, not a fixed order. Each request is independent and creates temporary agent resources that are deleted afterward.
 
 ## Recovery Paths
 
-- If Azure access is blocked, run the ten offline tests and inspect captured function outputs.
+- If Azure access is blocked, run the offline tests and inspect captured function outputs.
 - If the agent returns a function call but no final answer, confirm outputs are submitted with the same conversation ID.
 - If only one part is checked, confirm the loop processes all output items and permits another tool-call round.
 - If an agent version remains after interruption, delete it from the Foundry portal.

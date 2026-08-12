@@ -17,10 +17,6 @@ from maintenance_tools import TOOL_DEFINITIONS, execute_tool
 
 
 AGENT_NAME = "opg-maintenance-tool-agent"
-SAMPLE_REQUEST = (
-    "ASSET-104 has a seal leak. Check the asset record and the stock position for "
-    "each installed part, then tell me what a planner should verify next."
-)
 AGENT_INSTRUCTIONS = """You are an OPG maintenance planning assistant working with synthetic data.
 Use get_asset for asset facts and get_parts_inventory for current stock facts.
 Do not invent identifiers, records, quantities, or maintenance history.
@@ -121,6 +117,20 @@ def invoke_agent(
         )
 
 
+def read_request() -> str | None:
+    while True:
+        try:
+            request = input("\nMaintenance request (or type 'exit'): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return None
+        if request.lower() in {"exit", "quit"}:
+            return None
+        if request:
+            return request
+        print("Enter a maintenance request, or type 'exit' to stop.")
+
+
 def main() -> None:
     load_dotenv()
     endpoint = required_environment("FOUNDRY_PROJECT_ENDPOINT")
@@ -131,8 +141,10 @@ def main() -> None:
         AIProjectClient(endpoint=endpoint, credential=credential) as project_client,
         project_client.get_openai_client() as openai_client,
     ):
-        answer = invoke_agent(project_client, openai_client, model_name, SAMPLE_REQUEST)
-        print(f"\nAgent response:\n{answer}")
+        print("Enter one maintenance scenario at a time. Each request is independent.")
+        while request := read_request():
+            answer = invoke_agent(project_client, openai_client, model_name, request)
+            print(f"\nAgent response:\n{answer}")
 
 
 if __name__ == "__main__":

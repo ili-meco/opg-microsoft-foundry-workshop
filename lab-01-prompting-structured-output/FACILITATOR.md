@@ -20,6 +20,7 @@ Participants turn the Lab 00 free-form response into the contract used by later 
 2. Compare the baseline prose with `model_dump_json(indent=2)`.
 3. Ask whether valid JSON proves the recommendation is correct. The answer is no; Labs 02 and 03 add current facts and approved evidence.
 4. Ask whether `authorization="recommendation_only"` prevents a write. The answer is no; Lab 04 adds an application-controlled approval boundary and no write tool exists in the workshop.
+5. Use the terminal loop to submit normal, missing-evidence, and unauthorized prompts without editing Python between runs. Explain that each prompt is independent and that the solution uses two model calls per prompt.
 
 ## Common Issues
 

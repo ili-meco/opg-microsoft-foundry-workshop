@@ -11,17 +11,25 @@ from dotenv import load_dotenv
 from maintenance_assessment import request_structured_assessment
 
 
-SAMPLE_REQUEST = (
-    "Asset ASSET-104 has increasing vibration and a small seal leak. "
-    "The last inspection was 30 days ago. Tell me what the planner should do next."
-)
-
-
 def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
     if not value or value.startswith("<") or "<account>" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
     return value
+
+
+def read_request() -> str | None:
+    while True:
+        try:
+            request = input("\nMaintenance request (or type 'exit'): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return None
+        if request.lower() in {"exit", "quit"}:
+            return None
+        if request:
+            return request
+        print("Enter a maintenance request, or type 'exit' to stop.")
 
 
 def main() -> None:
@@ -34,13 +42,16 @@ def main() -> None:
         AIProjectClient(endpoint=endpoint, credential=credential) as project_client,
         project_client.get_openai_client() as openai_client,
     ):
-        assessment = request_structured_assessment(
-            openai_client,
-            model_name,
-            SAMPLE_REQUEST,
-        )
+        print("Enter one maintenance scenario at a time. Each request is independent.")
+        while request := read_request():
+            assessment = request_structured_assessment(
+                openai_client,
+                model_name,
+                request,
+            )
 
-    print(assessment.model_dump_json(indent=2))
+            print("\n=== Structured response ===")
+            print(assessment.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":

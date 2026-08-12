@@ -20,12 +20,16 @@ def load_records(file_name: str, key: str) -> dict[str, dict[str, Any]]:
 
 
 def get_asset(asset_id: str) -> dict[str, Any]:
-    # TODO: validate the ID, look up one asset, and return ok/not_found/error.
+    # TODO 1: Reject values that do not match ASSET-### with status="error".
+    # TODO 2: Load assets.json and return status="not_found" when the ID is absent.
+    # TODO 3: Return only the matching asset in a status="ok" result.
     raise NotImplementedError
 
 
 def get_parts_inventory(part_number: str) -> dict[str, Any]:
-    # TODO: validate the part number, look up one record, and return ok/not_found/error.
+    # TODO 4: Reject values that do not match PART-### with status="error".
+    # TODO 5: Load inventory.json and return status="not_found" when the part is absent.
+    # TODO 6: Return only the matching inventory record in a status="ok" result.
     raise NotImplementedError
 
 
@@ -37,5 +41,7 @@ TOOL_FUNCTIONS: dict[str, ToolFunction] = {
 
 
 def execute_tool(tool_name: str, arguments: Mapping[str, Any]) -> dict[str, Any]:
-    # TODO: use the closed dispatch table and safely handle invalid arguments.
+    # TODO 7: Resolve tool_name only through TOOL_FUNCTIONS; reject unknown names.
+    # TODO 8: Call the selected function with the supplied arguments and convert
+    # argument-shape errors into a structured status="error" result.
     raise NotImplementedError
