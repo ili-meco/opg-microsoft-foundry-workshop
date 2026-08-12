@@ -13,7 +13,7 @@ fi
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
-  echo "Created .env. Add the instructor-provided Foundry values before Lab 00."
+  echo "Created .env. Add values from your Foundry resources before Lab 00."
 fi
 
 .venv/bin/python scripts/verify_setup.py

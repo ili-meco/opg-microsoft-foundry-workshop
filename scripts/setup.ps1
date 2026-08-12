@@ -14,7 +14,7 @@ try {
 
     if (-not (Test-Path ".env")) {
         Copy-Item ".env.example" ".env"
-        Write-Host "Created .env. Add the instructor-provided Foundry values before Lab 00."
+        Write-Host "Created .env. Add values from your Foundry resources before Lab 00."
     }
 
     & $python scripts\verify_setup.py

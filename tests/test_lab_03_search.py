@@ -5,6 +5,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 SOLUTION_DIRECTORY = (
@@ -46,6 +47,10 @@ class SearchSchemaTests(unittest.TestCase):
         self.assertEqual(
             index.semantic_search.default_configuration_name,
             search_helpers.SEMANTIC_CONFIGURATION_NAME,
+        )
+        self.assertEqual(
+            index.vector_search.vectorizers[0].parameters.resource_url,
+            "https://example.openai.azure.com",
         )
 
     def test_embedding_results_are_attached_without_mutating_source(self) -> None:
@@ -122,6 +127,19 @@ class QueryModeTests(unittest.TestCase):
     def test_unknown_query_mode_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             search_helpers.build_query_arguments("seal leak", "magic")
+
+
+class InteractiveAgentTests(unittest.TestCase):
+    @patch("builtins.input", return_value="Compare revision 1 and revision 3")
+    def test_grounded_agent_reads_terminal_question(self, _mock_input) -> None:
+        self.assertEqual(
+            foundry_iq_agent.read_question(),
+            "Compare revision 1 and revision 3",
+        )
+
+    @patch("builtins.input", return_value="exit")
+    def test_grounded_agent_exit_stops_prompt_loop(self, _mock_input) -> None:
+        self.assertIsNone(foundry_iq_agent.read_question())
 
 
 if __name__ == "__main__":

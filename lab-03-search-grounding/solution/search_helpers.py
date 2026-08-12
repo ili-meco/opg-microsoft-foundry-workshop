@@ -34,7 +34,7 @@ def load_documents(data_path: Path) -> list[dict[str, Any]]:
 
 def build_search_index(
     index_name: str,
-    azure_openai_endpoint: str,
+    embedding_endpoint: str,
     embedding_deployment: str,
     embedding_model: str,
     embedding_dimensions: int,
@@ -90,7 +90,7 @@ def build_search_index(
                 AzureOpenAIVectorizer(
                     vectorizer_name=VECTORIZER_NAME,
                     parameters=AzureOpenAIVectorizerParameters(
-                        resource_url=azure_openai_endpoint,
+                        resource_url=embedding_endpoint,
                         deployment_name=embedding_deployment,
                         model_name=embedding_model,
                     ),

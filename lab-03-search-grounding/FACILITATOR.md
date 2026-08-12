@@ -4,21 +4,25 @@
 
 | Time | Activity |
 |---|---|
-| 0-10 minutes | Verify Search, model, identities, and role assignments |
-| 10-25 minutes | Inspect the corpus and design the index schema |
-| 25-45 minutes | Create the index, upload vectors, and compare retrieval modes |
-| 45-55 minutes | Use Search explorer and discuss relevance versus authority |
-| 55-70 minutes | Create the knowledge source, knowledge base, and MCP connection |
-| 70-85 minutes | Test supported, missing, conflicting, and malicious evidence |
-| 85-90 minutes | Clean up and connect retrieval quality to evaluation |
+| 0-15 minutes | Explain the three endpoint/ID values and verify configuration |
+| 15-25 minutes | Inspect the six-document corpus and identify trust problems |
+| 25-40 minutes | Create the index, validate embeddings, and upload documents |
+| 40-60 minutes | Complete the query TODOs and compare interactive results |
+| 60-72 minutes | Explain and create the Foundry IQ knowledge path |
+| 72-87 minutes | Test supported, missing, conflicting, and malicious evidence |
+| 87-90 minutes | Clean up and connect retrieval quality to evaluation |
 
-## Preflight
+## Workshop Resource Standard
 
-- Predeploy a `text-embedding-3-small` deployment and confirm its 1,536 dimensions.
-- Enable semantic ranker and system-assigned identities on Search and Foundry.
+- Use `Sweden Central` for Search and Foundry unless model capacity requires another region.
+- Use the Search `Basic` tier because this lab depends on managed identity.
+- Predeploy `text-embedding-3-small` and confirm its default 1,536 dimensions.
+- Enable system-assigned identities on Search and Foundry.
 - Assign all roles with a non-admin test identity before the workshop.
 - Give teams unique suffixes for index, source, base, connection, and agent names.
-- Run both solution scripts end to end in the workshop region.
+- Run index setup, interactive Search, Foundry IQ, and cleanup end to end.
+
+Do not describe `FOUNDRY_EMBEDDING_ENDPOINT` as a separate Azure OpenAI resource. It is the parent Foundry resource's model-serving endpoint. Keep the project-scoped endpoint, parent endpoint, and ARM resource ID visible together while explaining their different API surfaces.
 
 ## Expected Retrieval Pattern
 
@@ -26,8 +30,10 @@ For the default pump question, the current `PROC-PUMP-017-R3` document should ra
 
 ## Recovery Paths
 
-- If embedding upload is blocked, provide a prebuilt index and begin with direct queries.
+- If model capacity blocks Sweden Central, use another region only after confirming agentic retrieval, semantic ranker, and both model deployments.
+- If embedding upload is blocked, provide a prebuilt per-team index and begin with direct queries.
 - If query vectorization returns 403, verify the Search managed identity can invoke the embedding model on the Foundry parent resource.
+- If document upload reports a dimension mismatch, restore `text-embedding-3-small` and `FOUNDRY_EMBEDDING_DIMENSIONS=1536`.
 - If MCP retrieval returns 403, verify the Foundry project managed identity has `Search Index Data Reader`.
 - If project connection creation returns 403, verify the attendee has `Foundry Project Manager`.
 - If semantic search fails, verify semantic ranker is enabled and the configured name is `maintenance-semantic`.
