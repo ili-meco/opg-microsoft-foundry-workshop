@@ -5,8 +5,10 @@ from __future__ import annotations
 from agent_framework import Agent
 from agent_framework.openai import OpenAIChatClient
 from agent_framework.orchestrations import SequentialBuilder
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+
+FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"
 
 PLANNER_INSTRUCTIONS = """Draft a maintenance recommendation from supplied facts and evidence.
 Never claim authority to control equipment, approve work, or reserve inventory.
@@ -20,16 +22,33 @@ def foundry_openai_base_url(project_endpoint: str) -> str:
     return f"{project_endpoint.rstrip('/')}/openai/v1/"
 
 
+def foundry_token_provider(credential: DefaultAzureCredential):
+    sync_provider = get_bearer_token_provider(credential, FOUNDRY_TOKEN_SCOPE)
+
+    async def get_token() -> str:
+        return sync_provider()
+
+    return get_token
+
+
+def build_foundry_chat_client(
+    project_endpoint: str,
+    model_name: str,
+    credential: DefaultAzureCredential,
+) -> OpenAIChatClient:
+    return OpenAIChatClient(
+        model=model_name,
+        api_key=foundry_token_provider(credential),
+        base_url=foundry_openai_base_url(project_endpoint),
+    )
+
+
 def build_workflow(
     project_endpoint: str,
     model_name: str,
     credential: DefaultAzureCredential,
 ):
-    client = OpenAIChatClient(
-        model=model_name,
-        credential=credential,
-        base_url=foundry_openai_base_url(project_endpoint),
-    )
+    client = build_foundry_chat_client(project_endpoint, model_name, credential)
     planner = Agent(client=client, name="maintenance_planner", instructions=PLANNER_INSTRUCTIONS)
     reviewer = Agent(client=client, name="safety_reviewer", instructions=REVIEWER_INSTRUCTIONS)
 

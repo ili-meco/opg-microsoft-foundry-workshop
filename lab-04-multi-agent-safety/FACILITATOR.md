@@ -51,6 +51,10 @@ python -m unittest tests.test_lab_04_approval tests.test_lab_04_workflow -v
 
 ## Live-Run Troubleshooting
 
-- 401/403: rerun `az login` and confirm access to the Foundry project.
+- 401 with `audience is incorrect (https://ai.azure.com)`: confirm the token provider explicitly requests `https://ai.azure.com/.default`. The pinned client otherwise requests the Azure OpenAI `cognitiveservices` audience.
+- 400 with `api-version query parameter is not allowed when using /v1 path`: pass the token provider through `OpenAIChatClient(api_key=...)`, not `credential=...`. The latter selects Azure routing and appends the forbidden query parameter.
+- `TypeError: object str can't be used in 'await' expression`: return the async wrapper from `foundry_token_provider()`. `AsyncOpenAI` awaits callable API-key providers, but Azure Identity's provider is synchronous.
+- 401 with a missing, invalid, or expired token after confirming the audience: rerun `az login`.
+- 403: confirm the signed-in identity has access to the Foundry project and model deployment.
 - Reviewer JSON validation failure: inspect the raw final workflow text and reinforce the JSON-only instruction.
 - Model deployment not found: confirm `FOUNDRY_MODEL_NAME` uses the deployment name, not the catalog model name.

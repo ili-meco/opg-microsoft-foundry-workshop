@@ -11,11 +11,13 @@ from typing import Literal
 from agent_framework import Agent
 from agent_framework.openai import OpenAIChatClient
 from agent_framework.orchestrations import SequentialBuilder
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 
 from approval_gate import ApprovalRecord, apply_approval_gate, parse_safety_review
 
+
+FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"
 
 PLANNER_INSTRUCTIONS = """You are the OPG maintenance planner agent.
 Draft a recommendation using only operational facts and retrieved evidence in the package.
@@ -48,17 +50,36 @@ def foundry_openai_base_url(project_endpoint: str) -> str:
     return f"{project_endpoint.rstrip('/')}/openai/v1/"
 
 
+def foundry_token_provider(credential: DefaultAzureCredential):
+    """Return a token provider scoped to the Microsoft Foundry data plane."""
+    sync_provider = get_bearer_token_provider(credential, FOUNDRY_TOKEN_SCOPE)
+
+    async def get_token() -> str:
+        return sync_provider()
+
+    return get_token
+
+
+def build_foundry_chat_client(
+    project_endpoint: str,
+    model_name: str,
+    credential: DefaultAzureCredential,
+) -> OpenAIChatClient:
+    """Build the OpenAI-compatible client for a Foundry project endpoint."""
+    return OpenAIChatClient(
+        model=model_name,
+        api_key=foundry_token_provider(credential),
+        base_url=foundry_openai_base_url(project_endpoint),
+    )
+
+
 def build_workflow(
     project_endpoint: str,
     model_name: str,
     credential: DefaultAzureCredential,
 ):
     """Build a planner -> reviewer MAF workflow against the Foundry model."""
-    client = OpenAIChatClient(
-        model=model_name,
-        credential=credential,
-        base_url=foundry_openai_base_url(project_endpoint),
-    )
+    client = build_foundry_chat_client(project_endpoint, model_name, credential)
     planner = Agent(
         client=client,
         name="maintenance_planner",

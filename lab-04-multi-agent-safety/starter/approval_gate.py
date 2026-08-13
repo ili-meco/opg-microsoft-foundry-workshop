@@ -52,17 +52,20 @@ def apply_approval_gate(
     review: SafetyReview,
     human_decision: Literal["approve", "reject"] | None = None,
 ) -> ApprovalRecord:
-    # TODO 2: Compute status with an application-owned state machine.
+    # TODO 2: Compute status by passing through two gates in order.
     #
-    # Evaluate the reviewer decision before the human decision:
-    # - review.decision is `revise` or `escalate` -> `blocked`, even when the
-    #   human_decision argument is `approve`.
-    # - review.decision is `approve` and human_decision is None -> `pending`.
-    # - review.decision is `approve` and the human approves -> `approved`.
-    # - review.decision is `approve` and the human rejects -> `rejected`.
+    # Gate 1 - reviewer clearance:
+    # - If review.decision is not `approve`, status is `blocked`.
+    # - Do not inspect or honor human approval after a reviewer block.
     #
-    # This ordering is the safety boundary: human approval can accept a clean
-    # recommendation, but it cannot repair missing evidence or override a block.
+    # Gate 2 - human decision (reached only after reviewer approval):
+    # - No human decision yet -> `pending`.
+    # - Human selects approve -> `approved`.
+    # - Human selects reject -> `rejected`.
+    #
+    # Mental model:
+    # reviewer decides whether approval is available;
+    # human decides whether to accept a reviewer-cleared recommendation.
     #
     # TODO 3: Return an ApprovalRecord that preserves the audit evidence.
     #

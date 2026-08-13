@@ -137,17 +137,75 @@ This deliberately fails closed. A reviewer response that is almost correct is st
 
 ### TODO 2: Calculate the Approval Status
 
-Implement the status branches in `apply_approval_gate()` in this order:
+Think of `apply_approval_gate()` as two gates that must be checked in order:
 
-| Reviewer decision | Human decision | Required status | Reason |
-|---|---|---|---|
-| `revise` | Any value | `blocked` | A correctable safety or evidence issue must return to the workflow. |
-| `escalate` | Any value | `blocked` | The automated path lacks enough evidence or authority to continue. |
-| `approve` | None | `pending` | Reviewer approval is not a substitute for human approval. |
-| `approve` | `approve` | `approved` | A human accepted a reviewer-cleared recommendation. |
-| `approve` | `reject` | `rejected` | A human declined the recommendation. |
+```text
+reviewer gate -> human gate -> final status
+```
 
-Check the reviewer decision first. If you check `human_decision == "approve"` first, a person could accidentally override `revise` or `escalate`.
+#### Gate 1: Did the Safety Reviewer Clear the Recommendation?
+
+Check `review.decision` first.
+
+- If the reviewer says `revise`, set the status to `blocked`. The draft has a correctable safety or evidence problem and must be rewritten.
+- If the reviewer says `escalate`, set the status to `blocked`. The available evidence or workflow authority is insufficient, so the case must leave the automated path.
+- Only when the reviewer says `approve` may the recommendation continue to the human gate.
+
+Once the reviewer blocks a recommendation, stop evaluating approval choices. A supplied human value does not change the result. For example:
+
+```text
+reviewer = revise
+human = approve
+status = blocked
+```
+
+This is intentional. A person cannot turn an unsupported model recommendation into a supported one simply by selecting **approve**.
+
+#### Gate 2: What Did the Human Decide?
+
+Reach this gate only when `review.decision == "approve"`.
+
+- If `human_decision` is `None`, set the status to `pending`. The reviewer cleared the recommendation, but nobody has made the accountable human decision yet.
+- If `human_decision` is `approve`, set the status to `approved`.
+- If `human_decision` is `reject`, set the status to `rejected`.
+
+For example:
+
+```text
+reviewer = approve
+human = None
+status = pending
+```
+
+Later, the same reviewer-cleared recommendation can receive a human decision:
+
+```text
+reviewer = approve
+human = reject
+status = rejected
+```
+
+The four statuses mean:
+
+- `blocked`: The reviewer found a problem. Human approval is unavailable.
+- `pending`: The reviewer cleared the recommendation, but the human has not decided.
+- `approved`: Both the reviewer and the human approved the recommendation.
+- `rejected`: The reviewer cleared the recommendation, but the human declined it.
+
+Use this control flow:
+
+```text
+if the reviewer did not approve:
+    status is blocked
+else if the human has not decided:
+    status is pending
+else if the human approved:
+    status is approved
+else:
+    status is rejected
+```
+
+The ordering is the core safety rule: **the reviewer decides whether human approval is available; the human decides whether to accept a reviewer-cleared recommendation.**
 
 ### TODO 3: Create the Approval Record
 
@@ -161,20 +219,7 @@ Return an `ApprovalRecord` containing:
 
 Do not set `action_authority` to another value when status becomes `approved`. Its type and default intentionally keep it at `none`: approval permits presenting or recording a recommendation, not controlling equipment or changing a work order.
 
-Use this pseudocode to check your control flow without copying the solution:
-
-```text
-if reviewer did not approve:
-    block
-else if no human decision exists:
-    wait
-else if human approved:
-    approve the recommendation record
-else:
-    reject the recommendation record
-
-return a record that preserves review evidence and grants no action authority
-```
+After calculating the status, return a record that preserves the review evidence and grants no action authority.
 
 ### Validate Steps 1-3
 
@@ -199,6 +244,18 @@ After the focused gate tests pass, continue to workflow composition.
 ## Step 3: Compose the Agents
 
 Open `starter/safety_workflow.py`. The Foundry client and both agent instances are already created. Complete only the orchestration returned by `build_workflow()`.
+
+Before the TODOs, notice how authentication is constructed:
+
+```python
+get_bearer_token_provider(credential, "https://ai.azure.com/.default")
+```
+
+`FOUNDRY_PROJECT_ENDPOINT` is a project-scoped endpoint under `services.ai.azure.com/api/projects/...`. It expects a Microsoft Foundry data-plane token whose audience is `https://ai.azure.com`. Passing `DefaultAzureCredential` directly to this pinned `OpenAIChatClient` version would make Agent Framework request its default Azure OpenAI scope, `https://cognitiveservices.azure.com/.default`, and the project endpoint would reject that token with HTTP 401. The explicit provider keeps the credential chain while selecting the correct audience.
+
+The starter passes that provider through the client's `api_key` parameter intentionally. For this OpenAI-compatible `/openai/v1` route, the callable supplies the bearer token while keeping the transport on `AsyncOpenAI`. Passing it through `credential` would select Azure routing, append an `api-version` query parameter, and produce HTTP 400 because `/v1` forbids that query parameter.
+
+The Azure Identity helper returns a synchronous callable, while `AsyncOpenAI` awaits callable API-key providers. `foundry_token_provider()` therefore returns a small async wrapper around the Azure Identity provider. Returning the synchronous provider directly causes `TypeError: object str can't be used in 'await' expression` before any HTTP request is sent.
 
 ### TODO 1: Fix the Execution Order
 
@@ -250,6 +307,8 @@ python .\lab-04-multi-agent-safety\solution\safety_workflow.py
 ```
 
 When prompted, type `approve` or `reject`. Approval means the recommendation may be presented to the planner; it does not execute a maintenance action.
+
+If the run returns HTTP 401 with `audience is incorrect (https://ai.azure.com)`, confirm your file contains `FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"`. If it returns HTTP 400 saying `api-version query parameter is not allowed when using /v1 path`, confirm `OpenAIChatClient` receives `api_key=foundry_token_provider(credential)`, not `credential=...`. If Python reports that a token string cannot be awaited, confirm `foundry_token_provider()` returns its async `get_token` wrapper. Rerun `az login` only if all three settings are correct and the message instead says the token is missing, invalid, or expired.
 
 ## Step 5: Test Unsafe Variants
 
