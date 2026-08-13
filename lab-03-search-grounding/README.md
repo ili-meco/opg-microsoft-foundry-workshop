@@ -141,7 +141,13 @@ The resource ID identifies the exact project in Azure Resource Manager. The scri
 {FOUNDRY_PROJECT_RESOURCE_ID}/connections/{connection-name}
 ```
 
-In the Azure portal, open the Foundry project resource, select **JSON View**, and copy its `id` value. It has this shape:
+In the Azure portal:
+
+1. Search for and open your **Foundry project resource**.
+2. Select **Properties** in the resource menu.
+3. Copy the **Resource ID** value.
+
+Make sure you opened the project resource, not only the parent Foundry account. The copied ID must end with `/projects/<project-name>` and have this shape:
 
 ```text
 /subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.CognitiveServices/accounts/{account}/projects/{project}
