@@ -161,7 +161,7 @@ The output must retain `authorization: "recommendation_only"`. That field is an 
 
 ## Continue to Part B: Deterministic Tools
 
-Part A gives the application a validated response shape, but it does not make the model's claims current or factual. Continue with [Part B: Deterministic Tools](../lab-02-agent-tools/README.md) to add validated asset and inventory lookups.
+Part A gives the application a validated response shape, but it does not make the model's claims current or factual. Continue with [Part B: Deterministic Tools](part-b-tools/README.md) to add validated asset and inventory lookups.
 
 In Part B, keep the same distinction:
 

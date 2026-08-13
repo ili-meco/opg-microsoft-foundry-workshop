@@ -1,6 +1,6 @@
 # Lab 01, Part B Facilitator Notes: Deterministic Agent Tools
 
-Use these notes after Part A in the combined [Lab 01 facilitator guide](../lab-01-prompting-structured-output/FACILITATOR.md).
+Use these notes after Part A in the combined [Lab 01 facilitator guide](../FACILITATOR.md).
 
 ## Teaching Flow
 

@@ -11,7 +11,8 @@ from unittest.mock import patch
 
 SOLUTION_DIRECTORY = (
     Path(__file__).parents[1]
-    / "lab-02-agent-tools"
+    / "lab-01-prompting-structured-output"
+    / "part-b-tools"
     / "solution"
 )
 

@@ -8,7 +8,8 @@ from pathlib import Path
 
 TOOLS_PATH = (
     Path(__file__).parents[1]
-    / "lab-02-agent-tools"
+    / "lab-01-prompting-structured-output"
+    / "part-b-tools"
     / "solution"
     / "maintenance_tools.py"
 )

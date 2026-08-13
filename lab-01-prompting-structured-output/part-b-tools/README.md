@@ -2,7 +2,7 @@
 
 **Duration:** 50 minutes | **Skill level:** Intermediate
 
-This is Part B of [Lab 01: Structured Outputs and Deterministic Tools](../lab-01-prompting-structured-output/README.md). Part A made the final model response predictable and validated. Part B adds controlled access to current business facts.
+This is Part B of [Lab 01: Structured Outputs and Deterministic Tools](../README.md). Part A made the final model response predictable and validated. Part B adds controlled access to current business facts.
 
 ## What You Will Build
 
@@ -38,8 +38,8 @@ Unlike a model prompt, a tool returns current structured facts from a controlled
 | `starter/maintenance_agent.py` | The executable agent application. Complete its schema and function-call TODOs; the supplied code handles authentication, temporary agent creation, the terminal loop, and cleanup. |
 | `solution/maintenance_tools.py` | Completed reference implementation of the read-only lookups, result envelopes, and closed dispatcher. |
 | `solution/maintenance_agent.py` | Completed reference agent that exposes the tools to Foundry and resolves every function call locally. |
-| `tests/test_lab_02_tools.py` | Offline tests for identifier validation, record lookup, strict definitions, and rejection of unknown tools. |
-| `tests/test_lab_02_agent.py` | Offline tests for SDK tool construction and function-call result handling. Fake response items are used, so no model is called. |
+| `tests/test_lab_01_tools.py` | Offline tests for identifier validation, record lookup, strict definitions, and rejection of unknown tools. |
+| `tests/test_lab_01_agent_tools.py` | Offline tests for SDK tool construction and function-call result handling. Fake response items are used, so no model is called. |
 
 The starter agent imports `maintenance_tools.py` from the same starter folder. The solution agent imports the completed tools from the solution folder.
 
@@ -93,7 +93,7 @@ The completed loop is in `solution/maintenance_agent.py`.
 From the repository root:
 
 ```powershell
-python -m unittest tests.test_lab_02_tools tests.test_lab_02_agent -v
+python -m unittest tests.test_lab_01_tools tests.test_lab_01_agent_tools -v
 ```
 
 These tests establish the deterministic application behavior before a model is involved. They use the synthetic JSON files and fake response items, so they do not authenticate to Azure or consume model tokens.
@@ -109,13 +109,13 @@ Open a VS Code terminal at the repository root, activate the environment, authen
 ```powershell
 .\.venv\Scripts\Activate.ps1
 az login
-python .\lab-02-agent-tools\starter\maintenance_agent.py
+python .\lab-01-prompting-structured-output\part-b-tools\starter\maintenance_agent.py
 ```
 
 If you need a checkpoint, run the completed reference implementation from the same terminal:
 
 ```powershell
-python .\lab-02-agent-tools\solution\maintenance_agent.py
+python .\lab-01-prompting-structured-output\part-b-tools\solution\maintenance_agent.py
 ```
 
 For each terminal prompt, the script creates a temporary agent version and conversation, prints each local tool invocation, returns the final answer, and deletes the temporary resources. Type `exit` or `quit` to stop. Each request is independent and may require several billable model calls when the agent performs multiple tool rounds.

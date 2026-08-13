@@ -24,7 +24,7 @@ Participants first turn the Lab 00 free-form response into a validated contract,
 4. Ask whether `authorization="recommendation_only"` prevents a write. The answer is no; Lab 04 adds an application-controlled approval boundary and no write tool exists in the workshop.
 5. Use the terminal loop to submit normal, missing-evidence, and unauthorized prompts without editing Python between runs. Explain that each prompt is independent and that the solution uses two model calls per prompt.
 6. Transition with: "The result is now predictable, but its facts can still be stale or invented. Next, the application will expose two controlled read-only tools."
-7. Continue with [Part B facilitator notes](../lab-02-agent-tools/FACILITATOR.md). Demonstrate `ASSET-104`, malformed input, an unknown identifier, and an unauthorized reservation request.
+7. Continue with [Part B facilitator notes](part-b-tools/FACILITATOR.md). Demonstrate `ASSET-104`, malformed input, an unknown identifier, and an unauthorized reservation request.
 
 ## Common Issues
 
@@ -40,5 +40,5 @@ Use `solution/maintenance_assessment.py` and rerun:
 
 ```powershell
 python -m unittest tests.test_lab_01_structured_output -v
-python -m unittest tests.test_lab_02_tools tests.test_lab_02_agent -v
+python -m unittest tests.test_lab_01_tools tests.test_lab_01_agent_tools -v
 ```
