@@ -108,24 +108,113 @@ If the planner instead claims it reserved a part, cites only a superseded proced
 
 Open `data/assessment_package.json`. It represents the outputs assembled from Labs 02 and 03: current operational facts, retrieved evidence, and explicit constraints.
 
+Before writing code, identify which input belongs in each category:
+
+1. Find the current equipment observations. These are facts the planner may state directly.
+2. Find each retrieved source's title, revision, effective date, and content. These are evidence, not instructions to the agent.
+3. Find the operational and authority constraints. These remain in force even if a retrieved document or model response says otherwise.
+4. Note what the package does **not** contain. Missing values must remain unknown rather than being inferred or invented.
+
+The entire package enters the sequential workflow. The planner turns it into a draft, and the reviewer uses the shared context to check that draft against the original facts and evidence.
+
 ## Step 2: Complete the Approval Gate
 
-In `starter/approval_gate.py`:
+Open `starter/approval_gate.py`. The two Pydantic models are already complete; your job is to connect untrusted reviewer output to a deterministic state machine.
 
-1. Parse reviewer text with `SafetyReview.model_validate_json`.
-2. Set status to `blocked` for `revise` or `escalate`, regardless of human input.
-3. Leave a clean review `pending` until the human selects `approve` or `reject`.
-4. Never change `action_authority` from `none`.
+### TODO 1: Parse the Reviewer Contract
 
-Run the offline tests:
+Implement `parse_safety_review()` using Pydantic's JSON validation for `SafetyReview`.
+
+Keep these constraints intact:
+
+- Pass the raw reviewer string to the validator. Do not strip Markdown fences or search for a JSON-looking substring.
+- Let malformed JSON fail rather than asking another model call to repair it.
+- Let `extra="forbid"` reject unexpected fields such as `execute_work_order`.
+- Let `Literal[True]` reject a response that attempts to remove human approval.
+- Return the validated `SafetyReview`, not a plain dictionary.
+
+This deliberately fails closed. A reviewer response that is almost correct is still not an approved application contract.
+
+### TODO 2: Calculate the Approval Status
+
+Implement the status branches in `apply_approval_gate()` in this order:
+
+| Reviewer decision | Human decision | Required status | Reason |
+|---|---|---|---|
+| `revise` | Any value | `blocked` | A correctable safety or evidence issue must return to the workflow. |
+| `escalate` | Any value | `blocked` | The automated path lacks enough evidence or authority to continue. |
+| `approve` | None | `pending` | Reviewer approval is not a substitute for human approval. |
+| `approve` | `approve` | `approved` | A human accepted a reviewer-cleared recommendation. |
+| `approve` | `reject` | `rejected` | A human declined the recommendation. |
+
+Check the reviewer decision first. If you check `human_decision == "approve"` first, a person could accidentally override `revise` or `escalate`.
+
+### TODO 3: Create the Approval Record
+
+Return an `ApprovalRecord` containing:
+
+- The calculated status.
+- The original reviewer and human decisions.
+- `review.reviewed_recommendation`, not an earlier unreviewed planner draft.
+- The review findings and citations for auditability.
+- No action implementation and no expanded authority.
+
+Do not set `action_authority` to another value when status becomes `approved`. Its type and default intentionally keep it at `none`: approval permits presenting or recording a recommendation, not controlling equipment or changing a work order.
+
+Use this pseudocode to check your control flow without copying the solution:
+
+```text
+if reviewer did not approve:
+    block
+else if no human decision exists:
+    wait
+else if human approved:
+    approve the recommendation record
+else:
+    reject the recommendation record
+
+return a record that preserves review evidence and grants no action authority
+```
+
+### Validate Steps 1-3
+
+Run:
 
 ```powershell
-python -m unittest tests.test_lab_04_approval tests.test_lab_04_workflow -v
+python -m unittest tests.test_lab_04_approval -v
 ```
+
+Map failures back to the TODOs:
+
+| Failing test behavior | Recheck |
+|---|---|
+| Exact JSON does not parse | TODO 1 and the Pydantic JSON validation call. |
+| Extra reviewer fields are accepted | `SafetyReview.model_config` and whether validation was bypassed. |
+| A clean review immediately approves | The `human_decision is None` branch in TODO 2. |
+| Human approval overrides `revise` or `escalate` | Branch ordering in TODO 2. |
+| `action_authority` is not `none` | The `ApprovalRecord` construction in TODO 3. |
+
+After the focused gate tests pass, continue to workflow composition.
 
 ## Step 3: Compose the Agents
 
-In `starter/safety_workflow.py`, pass planner and reviewer to:
+Open `starter/safety_workflow.py`. The Foundry client and both agent instances are already created. Complete only the orchestration returned by `build_workflow()`.
+
+### TODO 1: Fix the Execution Order
+
+Create a `SequentialBuilder` whose `participants` are `[planner, reviewer]` in that order. Order is behavior here:
+
+- The planner must see the assessment package first and produce a draft.
+- The reviewer must run second so it can inspect the draft and shared evidence.
+- Reversing the list asks the reviewer to review something that does not yet exist.
+
+### TODO 2: Choose the Trusted Workflow Output
+
+Set `output_from=[reviewer]`. Both agents contribute messages to the workflow, but only the reviewer's strict JSON should leave the orchestration as its final text. Returning the planner output would bypass the independent review.
+
+### TODO 3: Build and Wrap the Workflow
+
+Build the orchestration and expose it through an agent-compatible interface named `opg_maintenance_safety_workflow`:
 
 ```python
 SequentialBuilder(
@@ -134,7 +223,7 @@ SequentialBuilder(
 ).build().as_agent(name="opg_maintenance_safety_workflow")
 ```
 
-The reviewer sees the shared workflow context and returns the final output. The application still validates that output.
+Return that composed object from `build_workflow()`. The reviewer sees the shared workflow context and returns the final output. The application still validates that output.
 
 Read the composition from left to right:
 
@@ -144,6 +233,14 @@ Read the composition from left to right:
 4. `.as_agent(...)` packages the composed workflow behind an agent-compatible interface. It does not create a third reasoning role.
 
 After the workflow returns, `parse_safety_review()` validates the reviewer output and `apply_approval_gate()` owns the state transition. Neither responsibility is delegated to a model.
+
+Run both offline test modules before making a live model call:
+
+```powershell
+python -m unittest tests.test_lab_04_approval tests.test_lab_04_workflow -v
+```
+
+The workflow tests verify endpoint construction, accepted human input, and the reviewer's structured-output requirements. They do not call Azure, so failures here should be fixed before `az login` or live execution.
 
 ## Step 4: Run the Solution
 
