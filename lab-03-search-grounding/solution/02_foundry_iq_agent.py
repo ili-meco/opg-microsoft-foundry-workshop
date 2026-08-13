@@ -34,7 +34,7 @@ Never claim to approve work, reserve parts, update a work order, or control equi
 
 def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
-    if not value or value.startswith("<"):
+    if not value or "<" in value or ">" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
     return value
 

@@ -56,7 +56,7 @@ SELECT_FIELDS = [
 
 def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
-    if not value or value.startswith("<"):
+    if not value or "<" in value or ">" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
     return value
 
@@ -71,7 +71,9 @@ def read_query() -> str | None:
 def print_results(mode: str, results: list[dict[str, Any]]) -> None:
     print(f"\n=== {mode.upper()} ===")
     for rank, result in enumerate(results, start=1):
-        score = result.get("@search.reranker_score", result.get("@search.score", 0))
+        score = result.get("@search.reranker_score")
+        if score is None:
+            score = result.get("@search.score") or 0.0
         print(
             f"{rank}. {result['id']} | score={score:.4f} | "
             f"revision={result['revision']} | {result['title']}"

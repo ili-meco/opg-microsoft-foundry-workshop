@@ -46,6 +46,18 @@ class ConfigurationChecksTests(unittest.TestCase):
 
         self.assertEqual([result.status for result in results], ["PASS", "PASS"])
 
+    def test_embedded_placeholder_is_not_configured(self) -> None:
+        environment = {
+            "FOUNDRY_PROJECT_ENDPOINT": (
+                "https://<account>.services.ai.azure.com/api/projects/<project>"
+            ),
+            "FOUNDRY_MODEL_NAME": "<deployment-name>",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            results = verify_setup.configuration_checks()
+
+        self.assertEqual([result.status for result in results], ["WARN", "WARN"])
+
 
 class ModuleChecksTests(unittest.TestCase):
     def test_missing_parent_package_is_reported_as_unavailable(self) -> None:

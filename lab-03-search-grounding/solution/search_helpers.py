@@ -175,7 +175,9 @@ def run_search(search_client: Any, query: str, mode: str, top: int = 3) -> list[
 def print_results(mode: str, results: list[dict[str, Any]]) -> None:
     print(f"\n=== {mode.upper()} ===")
     for rank, result in enumerate(results, start=1):
-        score = result.get("@search.reranker_score", result.get("@search.score", 0))
+        score = result.get("@search.reranker_score")
+        if score is None:
+            score = result.get("@search.score") or 0.0
         print(
             f"{rank}. {result['id']} | score={score:.4f} | "
             f"revision={result['revision']} | {result['title']}"

@@ -93,11 +93,12 @@ def configuration_checks(
     results = []
     for variable in variables:
         value = os.getenv(variable, "").strip()
+        configured = bool(value) and "<" not in value and ">" not in value
         results.append(
             CheckResult(
                 variable,
-                "PASS" if value else "WARN",
-                "configured" if value else "not configured yet",
+                "PASS" if configured else "WARN",
+                "configured" if configured else "not configured yet",
             )
         )
     return results

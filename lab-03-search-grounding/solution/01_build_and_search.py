@@ -5,11 +5,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from dotenv import load_dotenv
+from openai import OpenAI
 
 from search_helpers import (
     add_embeddings,
@@ -26,14 +26,13 @@ DEFAULT_QUERY = "What should happen when pump vibration rises and the seal start
 
 def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
-    if not value or value.startswith("<"):
+    if not value or "<" in value or ">" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
     return value
 
 
 def main() -> None:
     load_dotenv()
-    project_endpoint = required_environment("FOUNDRY_PROJECT_ENDPOINT")
     search_endpoint = required_environment("AZURE_SEARCH_ENDPOINT")
     embedding_endpoint = required_environment("FOUNDRY_EMBEDDING_ENDPOINT")
     embedding_deployment = required_environment("FOUNDRY_EMBEDDING_MODEL_NAME")
@@ -41,11 +40,15 @@ def main() -> None:
     embedding_dimensions = int(os.getenv("FOUNDRY_EMBEDDING_DIMENSIONS", "1536"))
     index_name = os.getenv("AZURE_SEARCH_INDEX_NAME", "opg-maintenance-documents")
 
-    with (
-        DefaultAzureCredential() as credential,
-        AIProjectClient(endpoint=project_endpoint, credential=credential) as project_client,
-        project_client.get_openai_client() as openai_client,
-    ):
+    with DefaultAzureCredential() as credential:
+        token_provider = get_bearer_token_provider(
+            credential,
+            "https://cognitiveservices.azure.com/.default",
+        )
+        openai_client = OpenAI(
+            base_url=f"{embedding_endpoint.rstrip('/')}/openai/v1/",
+            api_key=token_provider,
+        )
         index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)
         print("\nCheckpoint 1/4: defining the Search index schema")
         print(f"- Vector field: content_vector ({embedding_dimensions} dimensions)")
@@ -60,8 +63,13 @@ def main() -> None:
         index_client.create_or_update_index(index)
         print(f"Created or updated index '{index_name}'.")
 
-        print("\nCheckpoint 2/4: generating document embeddings through the Foundry project")
-        documents = add_embeddings(load_documents(DATA_PATH), openai_client, embedding_deployment)
+        print("\nCheckpoint 2/4: generating document embeddings through the Foundry resource")
+        with openai_client:
+            documents = add_embeddings(
+                load_documents(DATA_PATH),
+                openai_client,
+                embedding_deployment,
+            )
         vector_lengths = {len(document["content_vector"]) for document in documents}
         if vector_lengths != {embedding_dimensions}:
             raise RuntimeError(

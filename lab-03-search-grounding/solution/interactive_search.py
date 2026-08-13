@@ -13,7 +13,7 @@ from search_helpers import build_query_arguments, print_results
 
 def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
-    if not value or value.startswith("<"):
+    if not value or "<" in value or ">" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
     return value
 

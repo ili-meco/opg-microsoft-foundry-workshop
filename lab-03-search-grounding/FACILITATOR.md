@@ -22,7 +22,7 @@
 - Give teams unique suffixes for index, source, base, connection, and agent names.
 - Run index setup, interactive Search, Foundry IQ, and cleanup end to end.
 
-Do not describe `FOUNDRY_EMBEDDING_ENDPOINT` as a separate Azure OpenAI resource. It is the parent Foundry resource's model-serving endpoint. Keep the project-scoped endpoint, parent endpoint, and ARM resource ID visible together while explaining their different API surfaces.
+Do not describe `FOUNDRY_EMBEDDING_ENDPOINT` as a separate Azure OpenAI resource. It is the parent Foundry resource's model-serving endpoint. Python uses its OpenAI v1 route for document embeddings, and Search uses it for query vectorization. Keep the project-scoped endpoint, parent endpoint, and ARM resource ID visible together while explaining their different API surfaces.
 
 ## Expected Retrieval Pattern
 

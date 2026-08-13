@@ -128,6 +128,23 @@ class QueryModeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             search_helpers.build_query_arguments("seal leak", "magic")
 
+    @patch("builtins.print")
+    def test_keyword_results_fall_back_to_search_score(self, mock_print) -> None:
+        search_helpers.print_results(
+            "keyword",
+            [
+                {
+                    "id": "DOC-1",
+                    "revision": 1,
+                    "title": "Pump procedure",
+                    "@search.score": 2.5,
+                    "@search.reranker_score": None,
+                }
+            ],
+        )
+
+        self.assertIn("score=2.5000", mock_print.call_args_list[-1].args[0])
+
 
 class InteractiveAgentTests(unittest.TestCase):
     @patch("builtins.input", return_value="Compare revision 1 and revision 3")

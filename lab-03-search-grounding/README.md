@@ -84,7 +84,7 @@ Copy `.env.example` to `.env` if you have not already done so. Lab 03 uses three
 
 | Variable | Example shape | Used for |
 |---|---|---|
-| `FOUNDRY_PROJECT_ENDPOINT` | `https://account.services.ai.azure.com/api/projects/project` | Project data-plane calls: document embeddings, agents, conversations, and responses. |
+| `FOUNDRY_PROJECT_ENDPOINT` | `https://account.services.ai.azure.com/api/projects/project` | Project data-plane calls: agents, conversations, and responses. |
 | `FOUNDRY_PROJECT_RESOURCE_ID` | `/subscriptions/.../accounts/account/projects/project` | Azure Resource Manager calls that create and delete the Foundry MCP project connection. |
 | `FOUNDRY_EMBEDDING_ENDPOINT` | `https://account.services.ai.azure.com` | The parent Foundry resource's model-serving endpoint used by the Search query vectorizer. |
 | `AZURE_SEARCH_ENDPOINT` | `https://service.search.windows.net` | Index, document, query, knowledge-source, and knowledge-base operations. |
@@ -98,12 +98,10 @@ It does **not** require a separate Azure OpenAI resource. The endpoint can be th
 
 Azure AI Search owns the query-time vectorizer, so its index schema needs a model-serving `resourceUri`. Search accepts trusted parent resource domains such as `services.ai.azure.com`, `openai.azure.com`, and `cognitiveservices.azure.com`. The project endpoint ending in `/api/projects/<project>` is a project data-plane route, not a valid Search vectorizer resource URI.
 
-In this lab:
+In this lab, both embedding paths use the parent resource and the same deployment:
 
-- Python generates **document vectors** through `FOUNDRY_PROJECT_ENDPOINT` so you can see ingestion happen.
+- Python generates **document vectors** through `FOUNDRY_EMBEDDING_ENDPOINT/openai/v1/embeddings` so you can see ingestion happen.
 - Azure AI Search generates **query vectors** through `FOUNDRY_EMBEDDING_ENDPOINT` when it receives a `VectorizableTextQuery`.
-
-Both routes use the same embedding deployment.
 
 ### What do embedding dimensions mean?
 
@@ -214,15 +212,34 @@ Each TODO explains the exact SDK keys and why they are present. After completing
 python .\lab-03-search-grounding\starter\search_exercise.py
 ```
 
-Enter a question at the prompt. The same question runs in all three modes so you can compare ranked IDs and scores without editing source code. Try:
+Enter **one question at a time**. After each question:
+
+1. Press Enter once.
+2. Wait for the keyword, vector, and hybrid result lists.
+3. Compare the three rankings.
+4. Enter the next question only when `Search question (or 'exit'):` appears again.
+
+Do not copy all three examples into one prompt. The program reads one terminal input line as one query, so pasted questions would be combined and produce confusing rankings.
+
+First prompt:
 
 ```text
-What should happen when pump vibration rises and the seal starts leaking?
-Which document discusses abnormal vibration without using the word alarm?
-What is the exact coupling-bolt torque for ASSET-104?
+Search question (or 'exit'): What should happen when pump vibration rises and the seal starts leaking?
 ```
 
-Type `exit` to stop. If you get stuck after attempting the TODOs, run the completed client:
+After all three result lists appear, enter the second prompt:
+
+```text
+Search question (or 'exit'): Which document discusses abnormal vibration without using the word alarm?
+```
+
+After those results appear, enter the third prompt:
+
+```text
+Search question (or 'exit'): What is the exact coupling-bolt torque for ASSET-104?
+```
+
+Each question independently runs in all three modes. Type `exit` at a new prompt to stop. If you get stuck after attempting the TODOs, run the completed client:
 
 ```powershell
 python .\lab-03-search-grounding\solution\interactive_search.py
