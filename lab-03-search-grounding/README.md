@@ -245,6 +245,96 @@ Each question independently runs in all three modes. Type `exit` at a new prompt
 python .\lab-03-search-grounding\solution\interactive_search.py
 ```
 
+#### Option B: Use Search Explorer in the Azure Portal
+
+You can run the same comparison without Python after `01_build_and_search.py` has created and populated the index:
+
+1. Open your Azure AI Search service in the [Azure portal](https://portal.azure.com).
+2. Select **Search management** > **Indexes**.
+3. Select `opg-maintenance-documents`, or the name in `AZURE_SEARCH_INDEX_NAME`.
+4. Select the **Search explorer** tab.
+5. Select **View** > **JSON view**.
+
+Use the same question in all three requests. Paste and run **one JSON request at a time** so you can compare three separate responses.
+
+**Keyword request:**
+
+```json
+{
+  "search": "What should happen when pump vibration rises and the seal starts leaking?",
+  "select": "id,title,content,document_type,asset_type,effective_date,revision,source_url",
+  "top": 3
+}
+```
+
+This request searches the text fields. Select **Search**, record the order of the three document IDs, and notice whether the current or legacy revision ranks first.
+
+**Vector request:**
+
+```json
+{
+  "vectorQueries": [
+    {
+      "kind": "text",
+      "text": "What should happen when pump vibration rises and the seal starts leaking?",
+      "fields": "content_vector",
+      "k": 3
+    }
+  ],
+  "select": "id,title,content,document_type,asset_type,effective_date,revision,source_url",
+  "top": 3
+}
+```
+
+`kind: "text"` tells Search to send the question to the vectorizer configured on `content_vector`. You do not paste a 1,536-number vector. Select **Search** and compare the order with the keyword response.
+
+**Hybrid plus semantic request:**
+
+```json
+{
+  "search": "What should happen when pump vibration rises and the seal starts leaking?",
+  "vectorQueries": [
+    {
+      "kind": "text",
+      "text": "What should happen when pump vibration rises and the seal starts leaking?",
+      "fields": "content_vector",
+      "k": 3
+    }
+  ],
+  "queryType": "semantic",
+  "semanticConfiguration": "maintenance-semantic",
+  "select": "id,title,content,document_type,asset_type,effective_date,revision,source_url",
+  "top": 3
+}
+```
+
+This request runs keyword and vector retrieval in parallel, merges their candidates, and applies semantic reranking. Select **Search** and check whether `PROC-PUMP-017-R3`, the current procedure, moves above `PROC-PUMP-017-R1`, the superseded procedure.
+
+#### How to Read a Search Explorer Response
+
+Search Explorer returns JSON. Start with the `value` array; it contains the ranked documents. Read each result in this order:
+
+1. **Array position:** The first object is rank 1. Results are already ordered from strongest to weakest for that request.
+2. **`id` and `title`:** Identify the source that matched.
+3. **`content`:** Read the retrieved evidence. Identify the words or meaning that match the question and whether the text actually supports an answer.
+4. **`revision` and `effective_date`:** Check whether the result is current. Relevance ranking does not enforce document authority or revision policy.
+5. **`document_type` and `asset_type`:** Confirm that the source type and equipment type fit the question.
+6. **`source_url`:** This is the source reference an application can preserve for citations.
+7. **`@search.score`:** This is the first-stage score. It uses BM25 for keyword search, vector similarity for vector search, and reciprocal rank fusion (RRF) for hybrid search.
+8. **`@search.rerankerScore`:** This appears for the semantic request and ranges from 0 to 4. It is the semantic ranker's assessment of how completely the document addresses the query. For this hybrid semantic request, use it to understand the final ordering.
+
+Use scores only to compare results **within one response**. Do not compare a keyword score such as `4.5` with a vector score such as `0.89` or a semantic reranker score such as `2.7`; each is produced by a different algorithm and has a different range.
+
+Hybrid `@search.score` values can look small, around `0.03`, because RRF combines document ranks rather than reusing the keyword or vector score magnitude. A small RRF number does not mean the result is poor. In the semantic response, inspect `@search.rerankerScore` and the returned `content` together.
+
+For the workshop question, a useful interpretation is:
+
+- Keyword search can rank `PROC-PUMP-017-R1` first because it contains many exact matching terms, even though it is superseded.
+- Vector search should favor `PROC-PUMP-017-R3` because its overall meaning most closely matches the question.
+- Hybrid plus semantic search should also favor `PROC-PUMP-017-R3` after combining lexical and conceptual evidence.
+
+The key lesson is that a high score means **relevant to this query**, not **approved, current, or safe to follow**. Always inspect revision metadata or enforce an approval filter in a production retrieval design.
+
 The modes use different retrieval signals:
 
 | Mode | Signal | Best teaching example |
