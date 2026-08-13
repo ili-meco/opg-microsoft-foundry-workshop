@@ -147,6 +147,18 @@ class QueryModeTests(unittest.TestCase):
 
 
 class InteractiveAgentTests(unittest.TestCase):
+    def test_mcp_endpoint_uses_ga_minimal_retrieval(self) -> None:
+        endpoint = foundry_iq_agent.build_mcp_endpoint(
+            "https://workshop.search.windows.net/",
+            "maintenance-base",
+        )
+
+        self.assertEqual(
+            endpoint,
+            "https://workshop.search.windows.net/knowledgebases/maintenance-base/mcp"
+            "?api-version=2026-04-01",
+        )
+
     @patch("builtins.input", return_value="Compare revision 1 and revision 3")
     def test_grounded_agent_reads_terminal_question(self, _mock_input) -> None:
         self.assertEqual(

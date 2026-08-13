@@ -12,6 +12,8 @@
 | 72-87 minutes | Test supported, missing, conflicting, and malicious evidence |
 | 87-90 minutes | Clean up and connect retrieval quality to evaluation |
 
+For a portal-led delivery, use `02_foundry_iq_agent.py --setup-only` at 60 minutes. Learners then inspect **Build** > **Knowledge**, create an agent under **Build** > **Agents**, paste the workshop instructions, connect their knowledge base, and test in the playground. Allow an additional 10-15 minutes if every participant completes both the Python and portal paths.
+
 ## Workshop Resource Standard
 
 - Use `Sweden Central` for Search and Foundry unless model capacity requires another region.
@@ -35,6 +37,8 @@ For the default pump question, the current `PROC-PUMP-017-R3` document should ra
 - If query vectorization returns 403, verify the Search managed identity can invoke the embedding model on the Foundry parent resource.
 - If document upload reports a dimension mismatch, restore `text-embedding-3-small` and `FOUNDRY_EMBEDDING_DIMENSIONS=1536`.
 - If MCP retrieval returns 403, verify the Foundry project managed identity has `Search Index Data Reader`.
+- If the portal asks for a knowledge-base chat model, set retrieval reasoning to `Minimal` and output to `Extracted data`. The workshop agent model produces the final answer.
+- If a portal-created agent does not retrieve, confirm its Knowledge section points to the participant's suffixed knowledge base and that `knowledge_base_retrieve` is available.
 - If project connection creation returns 403, verify the attendee has `Foundry Project Manager`.
 - If semantic search fails, verify semantic ranker is enabled and the configured name is `maintenance-semantic`.
 - If the service does not support knowledge bases, complete Part A and demonstrate Part B from an instructor service.
