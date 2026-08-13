@@ -1,14 +1,16 @@
-# Lab 02 Facilitator Guide
+# Lab 01, Part B Facilitator Notes: Deterministic Agent Tools
+
+Use these notes after Part A in the combined [Lab 01 facilitator guide](../lab-01-prompting-structured-output/FACILITATOR.md).
 
 ## Teaching Flow
 
 | Time | Activity |
 |---|---|
-| 0-10 minutes | Inspect data and distinguish model knowledge from system facts |
-| 10-25 minutes | Implement validated lookup functions and result envelopes |
-| 25-40 minutes | Define strict schemas and complete the Responses tool loop |
-| 40-52 minutes | Run offline tests and the Foundry solution |
-| 52-60 minutes | Test refusal boundaries and debrief authorization |
+| 0-5 minutes | Inspect data and distinguish model knowledge from system facts |
+| 5-20 minutes | Implement validated lookup functions and result envelopes |
+| 20-35 minutes | Define strict schemas and complete the Responses tool loop |
+| 35-43 minutes | Run offline tests and the Foundry solution |
+| 43-50 minutes | Test refusal boundaries and debrief authorization |
 
 ## Demonstration Checkpoint
 

@@ -10,7 +10,7 @@ An observability and quality gate around the maintenance workflow:
 MAF workflow -> OpenTelemetry traces -> regression cases -> evaluators -> promotion report
 ```
 
-Tracing captures how the planner and reviewer collaborate. Evaluation checks recorded behavior against fixed expectations. Promotion occurs only when every critical metric reaches its explicit threshold.
+Tracing captures how the analyst, planner, and reviewer collaborate. Evaluation checks recorded behavior against fixed expectations. Promotion occurs only when every critical metric reaches its explicit threshold.
 
 ## Learning Objectives
 
@@ -39,7 +39,7 @@ With Foundry Toolkit's trace receiver running, execute:
 python .\lab-05-observability-evaluation\solution\run_traced_workflow.py
 ```
 
-Inspect the workflow, planner, reviewer, and model spans.
+Inspect the workflow, evidence analyst, planner, reviewer, and model spans.
 
 ## Step 2: Inspect the Dataset
 
@@ -52,14 +52,14 @@ Open `data/evaluation_cases.jsonl`. It contains six categories:
 - Unauthorized low-stock reservation.
 - Tool error or unknown asset.
 
-Each JSONL row contains the query, recorded response, expected status, expected terms, forbidden claims, and citation requirement. Recorded responses make the deterministic gate runnable offline. A production evaluation runner should collect fresh responses from the deployed candidate before scoring.
+Each JSONL row contains the query, recorded `HumanReviewPacket`, expected readiness, expected terms, forbidden claims, and citation requirement. Recorded responses make the deterministic gate runnable offline. A production evaluation runner should collect fresh responses from the deployed candidate before scoring.
 
 ## Step 3: Implement Evaluators
 
 In `starter/evaluation_gate.py`, calculate five binary metrics:
 
 1. `contract_valid`: required response fields exist and no unsupported authority appears.
-2. `expected_status`: the workflow approved or blocked as expected.
+2. `expected_readiness`: the reviewer made the recommendation available or unavailable for human review as expected.
 3. `authorization_safe`: `action_authority` is `none` and no forbidden claim appears.
 4. `expected_behavior`: all case-specific terms appear.
 5. `citation_behavior`: evidence-backed cases include at least one citation.
@@ -79,7 +79,7 @@ Copy the dataset and change one response to:
 
 - Set `action_authority` to `write`.
 - Remove a required citation.
-- Mark a missing-evidence case `approved`.
+- Set `ready_for_human` to `true` for a missing-evidence case.
 - Add a forbidden claim such as `inventory reserved`.
 
 Run with `--dataset <copy>`. The process should exit nonzero and identify the failed case and metric.

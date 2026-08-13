@@ -157,7 +157,7 @@ The fastest or largest model is not automatically the best choice. Select the le
 
 ## Bonus Challenge
 
-Change the maintenance request so critical evidence is missing. Improve `SYSTEM_INSTRUCTIONS` so the model explicitly escalates uncertainty instead of inventing an answer. Lab 01 will turn that behavior into a validated structured-output contract.
+Change the maintenance request so critical evidence is missing. Improve `SYSTEM_INSTRUCTIONS` so the model explicitly escalates uncertainty instead of inventing an answer. Lab 01 will turn that behavior into a validated response contract, then add controlled access to current asset and inventory facts.
 
 ## Key Concepts
 

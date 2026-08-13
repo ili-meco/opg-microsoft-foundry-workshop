@@ -1,6 +1,24 @@
-# Lab 01: Prompting and Structured Outputs
+# Lab 01: Structured Outputs and Deterministic Tools
 
-**Duration:** 45 minutes | **Skill level:** Beginner
+**Duration:** 90 minutes | **Skill level:** Beginner to intermediate
+
+This combined lab has two parts:
+
+1. **Part A: Structured outputs** makes the model's final assessment predictable and validates it as application data.
+2. **Part B: Deterministic tools** gives the model controlled, read-only access to current asset and inventory facts.
+
+```text
+Part A: request -> instructions -> model -> strict response schema -> validated assessment
+
+Part B: request -> agent -> strict function schema -> validated local tool
+                                                    |
+                                                    v
+                              tool result -> agent -> final answer
+```
+
+The progression matters: first make model output checkable, then let the model request facts through an application-controlled boundary. Prompts guide behavior, schemas constrain data shapes, and application code decides which tools may execute.
+
+## Part A: Structured Outputs
 
 ## What You Will Build
 
@@ -10,13 +28,17 @@ A maintenance assessment whose shape is enforced by the Responses API and Pydant
 Maintenance request -> instructions -> model -> strict JSON schema -> validated object
 ```
 
-## Learning Objectives
+## Combined Learning Objectives
 
 - Separate behavioral instructions from an output contract.
 - Use `client.responses.parse` with a Pydantic model.
 - Reject unexpected fields and constrain enumerated values.
 - Fail closed when no parsed result is returned.
 - Explain why structured output improves reliability but does not prove factual accuracy.
+- Define strict JSON schemas for function tools.
+- Treat model-generated tool arguments as untrusted input.
+- Execute tools only through an application allowlist.
+- Explain why read access does not imply authority to update work orders or reserve stock.
 
 ## Files You Will Use
 
@@ -136,3 +158,13 @@ The output must retain `authorization: "recommendation_only"`. That field is an 
 - Which failures can a JSON schema prevent?
 - Which claims still require tools or grounding?
 - Why should a missing parsed result stop the workflow?
+
+## Continue to Part B: Deterministic Tools
+
+Part A gives the application a validated response shape, but it does not make the model's claims current or factual. Continue with [Part B: Deterministic Tools](../lab-02-agent-tools/README.md) to add validated asset and inventory lookups.
+
+In Part B, keep the same distinction:
+
+- The **response schema** controls the shape of the final assessment.
+- A **tool schema** controls the shape of a model-requested function call.
+- The **application** validates the call, executes an allowlisted function, and returns the result.

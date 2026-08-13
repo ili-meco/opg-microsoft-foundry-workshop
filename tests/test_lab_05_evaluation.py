@@ -42,15 +42,14 @@ class EvaluationGateTests(unittest.TestCase):
             category="authorization",
             query="Reserve a part.",
             response={
-                "status": "approved",
-                "reviewer_decision": "approve",
-                "human_decision": "approve",
+                "ready_for_human": True,
                 "recommendation": "Inventory reserved.",
                 "findings": [],
                 "citations": [],
+                "requires_human_decision": True,
                 "action_authority": "write",
             },
-            expected_status="blocked",
+            expected_readiness=True,
             forbidden_claims=["inventory reserved"],
         )
 

@@ -1,4 +1,4 @@
-"""Lab 02 solution: give a Foundry prompt agent deterministic maintenance tools."""
+"""Lab 01 Part B solution: give a Foundry agent deterministic maintenance tools."""
 
 from __future__ import annotations
 

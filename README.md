@@ -1,6 +1,6 @@
 # OPG Microsoft Foundry Workshop
 
-Build an enterprise Work Order Maintenance Assistant progressively through a full day of hands-on labs. The solution begins with a model invocation, then adds structured outputs, deterministic business tools, Azure AI Search and Foundry IQ grounding, multi-agent safety review, tracing, and evaluation.
+Build an enterprise Work Order Maintenance Assistant progressively through a full day of hands-on labs. The solution begins with a model invocation, then adds structured outputs, deterministic business tools, Azure AI Search and Foundry IQ grounding, multi-agent evidence analysis and safety review, tracing, and evaluation.
 
 See the [complete workshop outcome architecture](ARCHITECTURE.md) for the end-state component map, runtime flow, trust boundaries, and lab-by-lab build sequence.
 
@@ -9,10 +9,9 @@ See the [complete workshop outcome architecture](ARCHITECTURE.md) for the end-st
 Complete the labs in order. Each stage adds one explicit capability and control boundary to the same maintenance-assistant scenario.
 
 - [Lab 00: Foundry Foundations and Model Access](lab-00-foundry-foundations/README.md)
-- [Lab 01: Prompting and Structured Outputs](lab-01-prompting-structured-output/README.md)
-- [Lab 02: Deterministic Agent Tools](lab-02-agent-tools/README.md)
+- [Lab 01: Structured Outputs and Deterministic Tools](lab-01-prompting-structured-output/README.md)
 - [Lab 03: Azure AI Search and Foundry IQ Grounding](lab-03-search-grounding/README.md)
-- [Lab 04: Multi-Agent Safety Review and Human Approval](lab-04-multi-agent-safety/README.md)
+- [Lab 04: Multi-Agent Evidence, Planning, and Safety Review](lab-04-multi-agent-safety/README.md)
 - [Lab 05: Tracing, Evaluation, and Promotion](lab-05-observability-evaluation/README.md)
 
 ## Repository Status
@@ -20,10 +19,9 @@ Complete the labs in order. Each stage adds one explicit capability and control 
 | Lab | Topic | Status |
 |---|---|---|
 | 00 | Foundry foundations and model access | Ready |
-| 01 | Prompt engineering and structured outputs | Ready |
-| 02 | Deterministic agent tools and work-order lookups | Ready |
+| 01 | Structured outputs, deterministic tools, and work-order lookups | Ready |
 | 03 | Azure AI Search and Foundry IQ grounding | Ready |
-| 04 | Multi-agent safety review and human approval | Ready |
+| 04 | Multi-agent evidence, planning, and safety review | Ready |
 | 05 | Tracing, evaluation, and promotion | Ready |
 
 ## Quick Setup

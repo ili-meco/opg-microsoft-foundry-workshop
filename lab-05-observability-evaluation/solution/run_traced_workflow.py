@@ -28,8 +28,8 @@ async def main() -> None:
         / "assessment_package.json"
     )
     assessment_package = json.loads(package_path.read_text(encoding="utf-8"))
-    record = await run_safety_workflow(assessment_package)
-    print(record.model_dump_json(indent=2))
+    review_packet = await run_safety_workflow(assessment_package)
+    print(review_packet.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Lab 02 starter: define strict tools and resolve Foundry function calls."""
+"""Lab 01 Part B starter: define strict tools and resolve Foundry function calls."""
 
 from __future__ import annotations
 

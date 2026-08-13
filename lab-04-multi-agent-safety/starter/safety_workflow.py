@@ -1,4 +1,4 @@
-"""Lab 04 starter: compose planner and reviewer agents with MAF."""
+"""Lab 04 starter: compose evidence, planning, and review agents with MAF."""
 
 from __future__ import annotations
 
@@ -10,11 +10,18 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"
 
-PLANNER_INSTRUCTIONS = """Draft a maintenance recommendation from supplied facts and evidence.
+EVIDENCE_ANALYST_INSTRUCTIONS = """Extract facts, current evidence, conflicts, and gaps.
+Return an EvidencePacket for the planner. Do not recommend or authorize actions.
+"""
+PLANNER_INSTRUCTIONS = """Draft a maintenance recommendation from the EvidencePacket.
 Never claim authority to control equipment, approve work, or reserve inventory.
+Attach a [Source: title, revision] citation to every consequential recommendation.
+Preserve uncertainty about continued operation and whether a listed part is needed.
+Begin the response with the exact line PLANNER_DRAFT.
 """
 REVIEWER_INSTRUCTIONS = """Independently review the planner draft for unsupported or unsafe claims.
-Return only the strict SafetyReview JSON described in the participant guide.
+The assistant message beginning with PLANNER_DRAFT is the planner artifact.
+Return only the strict HumanReviewPacket JSON described in the participant guide.
 """
 
 
@@ -49,14 +56,19 @@ def build_workflow(
     credential: DefaultAzureCredential,
 ):
     client = build_foundry_chat_client(project_endpoint, model_name, credential)
+    analyst = Agent(
+        client=client,
+        name="evidence_analyst",
+        instructions=EVIDENCE_ANALYST_INSTRUCTIONS,
+    )
     planner = Agent(client=client, name="maintenance_planner", instructions=PLANNER_INSTRUCTIONS)
     reviewer = Agent(client=client, name="safety_reviewer", instructions=REVIEWER_INSTRUCTIONS)
 
-    # TODO 1: Create a SequentialBuilder with the two agents in execution order.
+    # TODO 1: Create a SequentialBuilder with the three agents in execution order.
     #
-    # Put `planner` first so it drafts from the assessment package. Put
-    # `reviewer` second so it receives the shared workflow context and critiques
-    # the draft under a different instruction set.
+    # Put `analyst` first to separate evidence from gaps, `planner` second to
+    # draft from that packet, and `reviewer` last to decide whether the draft is
+    # ready for a human decision.
     #
     # TODO 2: Select only the reviewer as the workflow output.
     #

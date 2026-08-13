@@ -90,12 +90,22 @@ class SafetyWorkflowTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             safety_workflow.parse_human_decision("execute")
 
-    def test_reviewer_instructions_require_exact_json_and_human_approval(self) -> None:
+    def test_reviewer_instructions_require_exact_json_and_human_decision(self) -> None:
         instructions = safety_workflow.REVIEWER_INSTRUCTIONS
 
         self.assertIn("Return only one JSON object", instructions)
-        self.assertIn('"requires_human_approval": true', instructions)
+        self.assertIn('"ready_for_human": true | false', instructions)
+        self.assertIn('"requires_human_decision": true', instructions)
+        self.assertIn('"action_authority": "none"', instructions)
         self.assertIn("Never wrap the JSON in markdown", instructions)
+
+    def test_workflow_defines_three_distinct_agent_roles(self) -> None:
+        self.assertIn("evidence analyst", safety_workflow.EVIDENCE_ANALYST_INSTRUCTIONS)
+        self.assertIn("maintenance planner", safety_workflow.PLANNER_INSTRUCTIONS)
+        self.assertIn("safety reviewer", safety_workflow.REVIEWER_INSTRUCTIONS)
+        self.assertIn("PLANNER_DRAFT", safety_workflow.PLANNER_INSTRUCTIONS)
+        self.assertIn("PLANNER_DRAFT", safety_workflow.REVIEWER_INSTRUCTIONS)
+        self.assertIn("[Source: title, revision]", safety_workflow.PLANNER_INSTRUCTIONS)
 
 
 if __name__ == "__main__":

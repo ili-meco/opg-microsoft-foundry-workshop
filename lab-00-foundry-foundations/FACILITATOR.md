@@ -17,7 +17,7 @@
 | 10-20 minutes | Tour the project, deployments, endpoint, and playground |
 | 20-35 minutes | Complete and run the Python client |
 | 35-42 minutes | Compare deployments and discuss selection criteria |
-| 42-45 minutes | Check success criteria and connect to Lab 01 |
+| 42-45 minutes | Check success criteria and introduce Lab 01's output-to-tools progression |
 
 ## Recovery Paths
 

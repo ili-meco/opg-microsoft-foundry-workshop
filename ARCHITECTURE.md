@@ -144,34 +144,32 @@ The final response should contain:
 2. **Procedural evidence** with citations from Foundry IQ.
 3. **Conflicts or missing evidence**, including a clear `I don't know` when needed.
 4. **Recommended planner action** that does not claim authorization it lacks.
-5. **Safety-review outcome** and any required escalation.
-6. **Human approval status** for consequential actions.
+5. **Safety-review readiness** and any findings that require correction or escalation.
+6. **Human decision** for recommendations that are ready for review.
 
 ## How the Labs Assemble the System
 
 ```mermaid
 flowchart LR
     lab00[Lab 00<br/>Foundry access and model baseline]
-    lab01[Lab 01<br/>Prompting and structured output]
-    lab02[Lab 02<br/>Deterministic agent tools]
+    lab01[Lab 01<br/>Structured outputs and deterministic tools]
     lab03[Lab 03<br/>Search and Foundry IQ grounding]
-    lab04[Lab 04<br/>Safety review and human approval]
+    lab04[Lab 04<br/>Evidence, planning and safety review]
     lab05[Lab 05<br/>Tracing, evaluation and promotion]
     outcome[Complete maintenance-assistant prototype]
 
-    lab00 --> lab01 --> lab02 --> lab03 --> lab04 --> lab05 --> outcome
+    lab00 --> lab01 --> lab03 --> lab04 --> lab05 --> outcome
 ```
 
 | Lab | Capability added | Concrete outcome | Status |
 |---|---|---|---|
 | 00 | Authenticate and invoke a deployed model | Working Foundry project client and model baseline | Ready |
-| 01 | Constrain model behavior | Validated maintenance-assessment response contract | Ready |
-| 02 | Use current business facts | Strict function schemas, closed dispatch, and read-only asset/inventory lookups | Ready |
+| 01 | Constrain model output and use current business facts | Validated response contract, strict function schemas, closed dispatch, and read-only asset/inventory lookups | Ready |
 | 03 | Ground answers in enterprise evidence | Search index, keyword/vector/hybrid comparison, Foundry IQ knowledge base, citations, and MCP connection | Ready |
-| 04 | Separate recommendation from safety authorization | MAF reviewer agent, escalation rules, and human approval checkpoint | Ready |
+| 04 | Separate evidence, recommendation, and safety review | Three-agent MAF workflow, strict review packet, and human decision checkpoint | Ready |
 | 05 | Measure behavior before promotion | OpenTelemetry traces, test dataset, evaluators, quality thresholds, and promotion decision | Ready |
 
-Labs 02 and 03 deliberately teach separate mechanisms:
+Lab 01 Part B and Lab 03 deliberately teach separate mechanisms:
 
 - A **business tool** returns current, structured facts such as an asset status or stock quantity.
 - A **knowledge base** retrieves unstructured evidence such as procedures and policies.

@@ -1,4 +1,4 @@
-"""Lab 02 starter: complete the read-only maintenance tools."""
+"""Lab 01 Part B starter: complete the read-only maintenance tools."""
 
 from __future__ import annotations
 

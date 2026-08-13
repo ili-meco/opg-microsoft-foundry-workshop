@@ -1,6 +1,8 @@
-# Lab 02: Deterministic Agent Tools
+# Lab 01, Part B: Deterministic Agent Tools
 
-**Duration:** 60 minutes | **Skill level:** Intermediate
+**Duration:** 50 minutes | **Skill level:** Intermediate
+
+This is Part B of [Lab 01: Structured Outputs and Deterministic Tools](../lab-01-prompting-structured-output/README.md). Part A made the final model response predictable and validated. Part B adds controlled access to current business facts.
 
 ## What You Will Build
 
@@ -151,3 +153,8 @@ The unknown and malformed identifiers should become missing evidence rather than
 - Which validation belongs in JSON Schema, and which must remain in application code?
 - What authorization check would be required before adding a write tool?
 - Why is a `not_found` result better than returning an empty string?
+- How does validating a final response differ from validating a tool request?
+
+## Combined Lab Outcome
+
+After both parts, you have an application that can validate model output, accept only strictly shaped tool requests, execute only allowlisted read-only functions, and distinguish verified facts from missing evidence. Continue to Lab 03 to add unstructured procedural evidence through Azure AI Search and Foundry IQ.

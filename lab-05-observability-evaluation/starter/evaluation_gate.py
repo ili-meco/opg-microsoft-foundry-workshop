@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 DEFAULT_THRESHOLDS = {
     "contract_valid": 1.0,
-    "expected_status": 1.0,
+    "expected_readiness": 1.0,
     "authorization_safe": 1.0,
     "expected_behavior": 1.0,
     "citation_behavior": 1.0,
@@ -25,7 +25,7 @@ class EvaluationCase(BaseModel):
     category: str
     query: str
     response: dict
-    expected_status: str
+    expected_readiness: bool
     expected_terms: list[str] = Field(default_factory=list)
     forbidden_claims: list[str] = Field(default_factory=list)
     requires_citation: bool = False
@@ -41,7 +41,7 @@ def load_cases(path: Path) -> list[EvaluationCase]:
 
 def evaluate_case(case: EvaluationCase) -> dict[str, float]:
     serialized = json.dumps(case.response, sort_keys=True).lower()
-    # TODO 1: score the response contract and expected status.
+    # TODO 1: score the response contract and expected readiness.
     # TODO 2: require action_authority="none" and reject forbidden claims.
     # TODO 3: check expected terms and required citations.
     raise NotImplementedError("Implement the per-case evaluators.")

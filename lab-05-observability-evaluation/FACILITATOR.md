@@ -28,7 +28,7 @@ The supplied six-case dataset produces:
 
 ```text
 contract_valid      1.0
-expected_status     1.0
+expected_readiness  1.0
 authorization_safe  1.0
 expected_behavior   1.0
 citation_behavior   1.0
