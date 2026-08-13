@@ -76,7 +76,9 @@ Enable a system-assigned managed identity on both the Search service and the Fou
 | Search service managed identity | Foundry parent resource | `Cognitive Services OpenAI User` |
 | Foundry project managed identity | Search service | `Search Index Data Reader` |
 
-Role propagation can take several minutes. Give each team unique index, source, knowledge-base, connection, and agent names if teams share services.
+Role propagation can take several minutes.
+
+> **Shared workshop service:** Each participant must append their lowercase initials to every Lab 03 resource name in their local `.env`. For example, participant Iliana Meco uses `AZURE_SEARCH_INDEX_NAME=opg-maintenance-documents-im`. Use the same `-im` suffix for the knowledge source, knowledge base, connection, and agent names. The local `.env` is ignored by Git, so everyone can use the same repository without committing or overwriting another participant's names.
 
 ## Checkpoint 1: Understand the Configuration
 
@@ -91,6 +93,18 @@ Copy `.env.example` to `.env` if you have not already done so. Lab 03 uses three
 | `FOUNDRY_EMBEDDING_MODEL_NAME` | Your deployment name, such as `text-embedding-3-small` | Selects the deployed embedding model. A deployment name is not always identical to its model name. |
 | `FOUNDRY_EMBEDDING_MODEL` | `text-embedding-3-small` | Declares the underlying model in the Search vectorizer configuration. |
 | `FOUNDRY_EMBEDDING_DIMENSIONS` | `1536` | Declares how many numbers every stored embedding must contain. |
+
+Before continuing, replace `<initials>` in the Lab 03 resource names copied from `.env.example`. For example:
+
+```dotenv
+AZURE_SEARCH_INDEX_NAME=opg-maintenance-documents-im
+AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME=opg-maintenance-source-im
+AZURE_SEARCH_KNOWLEDGE_BASE_NAME=opg-maintenance-knowledge-im
+FOUNDRY_IQ_CONNECTION_NAME=opg-maintenance-iq-im
+FOUNDRY_GROUNDED_AGENT_NAME=opg-grounded-maintenance-agent-im
+```
+
+Use lowercase letters and confirm that no other participant has the same initials. If two participants share initials, add a number, such as `-im2`.
 
 ### Why is a separate embedding endpoint needed?
 
@@ -174,6 +188,8 @@ The last two items are intentional. Retrieval relevance does not prove that a do
 
 ### Checkpoint 3: Build and Populate the Index
 
+Confirm that `AZURE_SEARCH_INDEX_NAME` ends with your initials before running the build script. On a shared Search service, do not use the unsuffixed `opg-maintenance-documents` name.
+
 Open `solution/search_helpers.py` and locate `build_search_index()`. Read the schema in this order:
 
 1. `id` is the key used to address a document.
@@ -251,7 +267,7 @@ You can run the same comparison without Python after `01_build_and_search.py` ha
 
 1. Open your Azure AI Search service in the [Azure portal](https://portal.azure.com).
 2. Select **Search management** > **Indexes**.
-3. Select `opg-maintenance-documents`, or the name in `AZURE_SEARCH_INDEX_NAME`.
+3. Select your initials-suffixed index, using the name in `AZURE_SEARCH_INDEX_NAME`.
 4. Select the **Search explorer** tab.
 5. Select **View** > **JSON view**.
 
@@ -420,7 +436,7 @@ Delete the knowledge source, knowledge base, and Foundry project connection whil
 python .\lab-03-search-grounding\solution\03_cleanup.py
 ```
 
-Delete the index too only when it is not shared:
+Delete your initials-suffixed index only when the facilitator instructs you to do so:
 
 ```powershell
 python .\lab-03-search-grounding\solution\03_cleanup.py --delete-index
