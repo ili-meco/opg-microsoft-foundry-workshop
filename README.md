@@ -39,7 +39,7 @@ Complete the labs in order. Each stage adds one explicit capability and control 
 | 00 | Foundry foundations and model access | Ready |
 | 01 | Structured outputs, deterministic tools, and work-order lookups | Ready |
 | 03 | Azure AI Search and Foundry IQ grounding | Ready |
-| 04 | Multi-agent evidence, planning, and safety review | Ready |
+| 04 | Multi-agent evidence, planning, safety review, and optional hosted deployment | Ready |
 | 05 | Tracing, evaluation, and promotion | Ready |
 
 ## Quick Setup

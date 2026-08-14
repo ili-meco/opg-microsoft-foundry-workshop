@@ -1,6 +1,6 @@
 # Lab 04: Multi-Agent Evidence, Planning, and Safety Review
 
-**Duration:** 60 minutes | **Skill level:** Intermediate
+**Duration:** Part A: 60 minutes; optional Part B: 25 minutes | **Skill level:** Intermediate
 
 ## Your Part In The User Story
 
@@ -108,6 +108,7 @@ Findings explain whether the next step is correction, more evidence, or expert e
 - Validate the final model output as strict JSON.
 - Gate human input with one deterministic readiness check.
 - Keep human approval separate from action authority.
+- Optionally package and deploy the workflow with a Foundry Toolkit hosted-agent template.
 
 ## Step 1: Inspect the Assessment Package
 
@@ -253,6 +254,82 @@ findings = [specific evidence, safety, or authority problem]
 action_authority = none
 ```
 
+## Part B: Deploy the Workflow as a Hosted Agent
+
+Part B uses the Foundry Toolkit's official workflow template to create the hosting project. Do not build or copy `azure.yaml`, `.foundry`, `.vscode`, or the hosting dependencies by hand; the template owns those files.
+
+The deployment boundary is:
+
+```text
+caller -> hosted analyst -> planner -> safety reviewer -> HumanReviewPacket candidate
+                                                        |
+                                              caller validates JSON
+                                                        |
+                                         authorized human approve/reject
+```
+
+The hosted agent prepares the review packet. It does not prompt for, store, or execute the human decision.
+
+**Instructor preflight:** Before offering Part B, deploy and smoke-test the model used by the generated workflow template, confirm hosted-agent quota, and confirm participants can deploy to the shared project. Participants should reuse that deployment rather than create models during the lab.
+
+### Step B1: Create the Hosted-Agent Project
+
+Create the agent in a new empty folder outside this workshop repository so its generated workspace files do not collide with the lab files.
+
+1. Open the Foundry Toolkit view in VS Code.
+2. Select **Create New Hosted Agent**.
+3. Select the existing workshop Foundry project when prompted.
+4. Choose **Workflow agent (Responses, Agent Framework, Python)**.
+5. Keep **Code** deployment and the generated Python 3.13 runtime.
+
+The template creates the structure shown by the Toolkit, including:
+
+```text
+.foundry/
+.vscode/
+src/<generated-agent-folder>/
+       main.py
+       requirements.txt
+azure.yaml
+```
+
+The picker uses the same curated catalog as `azd ai agent sample list`. The template manifest is `samples/python/hosted-agents/agent-framework/responses/05-workflows/azure.yaml` in the official `microsoft-foundry/foundry-samples` repository.
+
+### Step B2: Replace Only the Sample Workflow
+
+Replace the generated `src/<generated-agent-folder>/main.py` with [part-b-hosted-agent/main.py](part-b-hosted-agent/main.py). Keep the generated `requirements.txt`, `azure.yaml`, `.foundry`, and `.vscode` files.
+
+The generated host uses `AZURE_AI_MODEL_DEPLOYMENT_NAME`; Part A uses `FOUNDRY_MODEL_NAME`. Keep the generated variable because the Toolkit injects it for local runs and deployments.
+
+Compare the replacement with Part A:
+
+- `FoundryChatClient` still connects MAF to the Foundry project.
+- `WorkflowBuilder` and `AgentExecutor` use the hosting template's workflow pattern.
+- `context_mode="full"` lets the reviewer inspect the original input, EvidencePacket, and planner draft. The template's slogan example uses `last_agent`, which is too narrow for this safety review.
+- `output_executors=[reviewer_executor]` prevents intermediate drafts from becoming the hosted response.
+- `ResponsesHostServer` exposes the workflow through the Foundry Responses protocol.
+- No `input()` or approval function runs inside the hosted agent.
+
+### Step B3: Run in Agent Inspector
+
+1. Create or select the Python virtual environment when prompted.
+2. Install the generated `requirements.txt` if the template has not already done so.
+3. Press `F5`. The generated debug configuration starts the host and opens Agent Inspector.
+4. Paste the contents of `data/assessment_package.json` into the Inspector.
+5. Confirm that the final response is one JSON object with `requires_human_decision=true` and `action_authority="none"`.
+
+The official workflow template currently recommends a stronger model for continuing a workflow from prior assistant messages and is tested with the model declared by its generated manifest. Use the template-selected or instructor-validated deployment; do not silently replace it with another model without repeating the local smoke test.
+
+### Step B4: Deploy with Foundry Toolkit
+
+1. Open the Command Palette with `Ctrl+Shift+P`.
+2. Run **Foundry Toolkit: Deploy Hosted Agent**.
+3. Select **Code**, confirm the generated agent name and runtime, then choose **Review + Deploy**.
+4. After deployment, invoke the agent in the Agent Playground and inspect its logs.
+5. Submit the same assessment package and compare the remote response with the local result.
+
+Deployment is complete when the remote endpoint returns the reviewer packet and still exposes no approval or action capability. A production caller must validate the response with the strict `HumanReviewPacket` contract from `solution/approval_gate.py` before offering an authorized person the separate approve/reject action.
+
 ## Troubleshooting
 
 - HTTP 401: rerun `az login` and confirm the signed-in identity has access to the Foundry project.
@@ -269,3 +346,5 @@ action_authority = none
 - [ ] An unready packet cannot receive a human decision.
 - [ ] Every ready recommendation requires explicit human approval or rejection.
 - [ ] No path grants equipment, work-order, or inventory authority.
+- [ ] In Part B, the Toolkit-generated host returns only the reviewer packet.
+- [ ] Human approval remains outside the hosted agent.
