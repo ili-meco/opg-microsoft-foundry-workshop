@@ -90,7 +90,7 @@ Enable a system-assigned managed identity on both the Search service and the Fou
 
 Role propagation can take several minutes.
 
-> **Shared workshop service:** Each participant must append their lowercase initials to every Lab 03 resource name in their local `.env`. For example, participant Iliana Meco uses `AZURE_SEARCH_INDEX_NAME=opg-maintenance-documents-im`. Use the same `-im` suffix for the knowledge source, knowledge base, connection, and agent names. The local `.env` is ignored by Git, so everyone can use the same repository without committing or overwriting another participant's names.
+> **Shared workshop service:** Each participant receives a cohort-prefixed resource name in their generated `.env`. For example, participant MT uses `RESOURCE_PREFIX=opg26a-mt` and `AZURE_SEARCH_INDEX_NAME=opg26a-mt-maintenance-documents`. Use the same assigned prefix for the knowledge source, knowledge base, connection, and agent names. The generated names let everyone use the shared services without overwriting another participant's resources.
 
 ## Checkpoint 1: Understand the Configuration
 
@@ -106,17 +106,20 @@ Copy `.env.example` to `.env` if you have not already done so. Lab 03 uses three
 | `FOUNDRY_EMBEDDING_MODEL` | `text-embedding-3-small` | Declares the underlying model in the Search vectorizer configuration. |
 | `FOUNDRY_EMBEDDING_DIMENSIONS` | `1536` | Declares how many numbers every stored embedding must contain. |
 
-Before continuing, replace `<initials>` in the Lab 03 resource names copied from `.env.example`. For example:
+Before continuing, confirm the assigned values in `PARTICIPANT.md` match the generated `.env`. For participant MT:
 
 ```dotenv
-AZURE_SEARCH_INDEX_NAME=opg-maintenance-documents-im
-AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME=opg-maintenance-source-im
-AZURE_SEARCH_KNOWLEDGE_BASE_NAME=opg-maintenance-knowledge-im
-FOUNDRY_IQ_CONNECTION_NAME=opg-maintenance-iq-im
-FOUNDRY_GROUNDED_AGENT_NAME=opg-grounded-maintenance-agent-im
+PARTICIPANT_ID=mt
+WORKSHOP_COHORT=opg26a
+RESOURCE_PREFIX=opg26a-mt
+AZURE_SEARCH_INDEX_NAME=opg26a-mt-maintenance-documents
+AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME=opg26a-mt-maintenance-source
+AZURE_SEARCH_KNOWLEDGE_BASE_NAME=opg26a-mt-maintenance-knowledge
+FOUNDRY_IQ_CONNECTION_NAME=opg26a-mt-maintenance-iq
+FOUNDRY_GROUNDED_AGENT_NAME=opg26a-mt-grounded-maintenance-agent
 ```
 
-Use lowercase letters and confirm that no other participant has the same initials. If two participants share initials, add a number, such as `-im2`.
+Do not edit the generated names or use another participant's prefix. If you are working from the canonical repository rather than a generated participant copy, ask the instructor for your assigned prefix before creating resources.
 
 ### Why is a separate embedding endpoint needed?
 
@@ -206,7 +209,7 @@ The last two items are intentional. Retrieval relevance does not prove that a do
 
 ### Checkpoint 3: Build and Populate the Index
 
-Confirm that `AZURE_SEARCH_INDEX_NAME` ends with your initials before running the build script. On a shared Search service, do not use the unsuffixed `opg-maintenance-documents` name.
+Confirm that `AZURE_SEARCH_INDEX_NAME` starts with your assigned `RESOURCE_PREFIX` before running the build script. On a shared Search service, do not use the unsuffixed `opg-maintenance-documents` name.
 
 Open `solution/search_helpers.py` and locate `build_search_index()`. Read the schema in this order:
 
@@ -472,9 +475,9 @@ Inspect these components before creating the agent:
 
 | Component | What to verify | Why it matters |
 |---|---|---|
-| Knowledge base | Its name ends with your initials. | The knowledge base is the reusable retrieval interface that agents connect to. |
+| Knowledge base | Its name starts with your assigned `RESOURCE_PREFIX`. | The knowledge base is the reusable retrieval interface that agents connect to. |
 | Knowledge source | It uses the name in `AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME`. | A knowledge base can combine one or more indexed or remote sources. |
-| Search index | The source points to your initials-suffixed `AZURE_SEARCH_INDEX_NAME`. | The source does not copy the documents; it retrieves from the existing Search index. |
+| Search index | The source points to your participant-prefixed `AZURE_SEARCH_INDEX_NAME`. | The source does not copy the documents; it retrieves from the existing Search index. |
 | Semantic configuration | The source uses `maintenance-semantic`. | This identifies the title and content fields used for semantic reranking. |
 | Retrieval reasoning | Keep it at **Minimal** for this lab. | Minimal retrieval needs no knowledge-base LLM and returns evidence for the agent to interpret. |
 | Output | Use **Extracted data** if the portal displays an output-mode choice. | The Foundry agent, rather than Search, writes the final maintenance answer. |
@@ -486,7 +489,7 @@ If the knowledge base page asks for a chat-completions model, check the retrieva
 
 1. Return to **Build** and select the **Agents** tab.
 2. Select **Create agent**. If the portal instead shows **New agent**, use that action.
-3. Name the agent with the value in `FOUNDRY_GROUNDED_AGENT_NAME` so it ends with your initials.
+3. Name the agent with the participant-prefixed value in `FOUNDRY_GROUNDED_AGENT_NAME`.
 4. Select the model deployment named in `FOUNDRY_MODEL_NAME`.
 5. In the agent's **Instructions** field, replace the default text with these system instructions:
 

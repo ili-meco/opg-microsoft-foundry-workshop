@@ -42,6 +42,26 @@ Complete the labs in order. Each stage adds one explicit capability and control 
 | 04 | Multi-agent evidence, planning, safety review, and optional hosted deployment | Ready |
 | 05 | Tracing, evaluation, and promotion | Ready |
 
+## Participant Workspaces
+
+Workshop resources use a cohort and participant prefix to avoid collisions in the shared Foundry project and Azure AI Search service. The current roster uses `opg26a-<initials>`, such as `opg26a-mt`.
+
+Before the workshop, an instructor can generate all 15 isolated participant copies:
+
+```powershell
+python .\scripts\create_participant_workspaces.py
+```
+
+To populate the copies with the allowlisted non-secret shared values from the instructor's `.env`, run:
+
+```powershell
+python .\scripts\create_participant_workspaces.py --shared-environment .env
+```
+
+The command writes ignored distributions under `participant-workspaces/`. Each copy contains the same runnable labs and tests, a generated `.env`, and `PARTICIPANT.md` with its assigned Search, Foundry IQ, hosted-agent, `azd`, and evaluation names. It excludes Git metadata, `AGENTS.md`, and facilitator guides, and refuses to overwrite an existing participant folder.
+
+Use `--participant mt` to generate one participant while testing the preparation process. Delete that generated folder before generating the full roster.
+
 ## Quick Setup
 
 Complete setup before the workshop:

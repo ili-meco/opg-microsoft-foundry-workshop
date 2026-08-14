@@ -274,13 +274,14 @@ The hosted agent prepares the review packet. It does not prompt for, store, or e
 
 ### Step B1: Create the Hosted-Agent Project
 
-Create the agent in a new empty folder outside this workshop repository so its generated workspace files do not collide with the lab files.
+Create the agent in a new empty sibling folder named with `HOSTED_AGENT_NAME` from your generated `.env`, such as `opg26a-mt-maintenance-agent`. Keeping the hosted project outside this workshop workspace prevents its generated files from colliding with the lab files.
 
 1. Open the Foundry Toolkit view in VS Code.
 2. Select **Create New Hosted Agent**.
 3. Select the existing workshop Foundry project when prompted.
 4. Choose **Workflow agent (Responses, Agent Framework, Python)**.
 5. Keep **Code** deployment and the generated Python 3.13 runtime.
+6. Use `HOSTED_AGENT_NAME` for the hosted-agent name and `AZURE_ENV_NAME` for the `azd` environment whenever the Toolkit prompts for them.
 
 The template creates the structure shown by the Toolkit, including:
 

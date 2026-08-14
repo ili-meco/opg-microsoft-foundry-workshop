@@ -27,44 +27,45 @@ By the end of the workshop, participants will be able to:
 
 > Times are estimates and may be adjusted based on participant questions, environment readiness, and the depth of hands-on discussion.
 
-## Day 1: Build with Microsoft Foundry
+Memory and fine-tuning are covered as design choices within the enterprise knowledge and retrieval session rather than as standalone sessions. The recovered 45 minutes is used to give participants more time for questions, examples, and discussion in the tools, enterprise knowledge, hosted agents, and governance presentations.
 
-**Estimated time:** 9:00 AM-5:30 PM, including lunch and breaks
+## Day 1: Foundry Foundations, Tools, and Enterprise Knowledge
+
+**Estimated time:** 9:00 AM-4:30 PM, including lunch and breaks
 
 | Time | Session | What participants will learn or do |
 |---|---|---|
-| 9:00-9:15 | Welcome and workshop orientation | Review objectives, working agreements, the maintenance scenario, and the two-day journey. |
-| 9:15-9:50 | Agentic AI and Microsoft Foundry foundations | Understand agents, agentic architecture patterns, Microsoft Foundry capabilities, and model-selection considerations. Includes a short model benchmarking demonstration. |
-| 9:50-10:20 | Hands-on: Foundry foundations and model access | Connect to the Foundry project, authenticate without API keys, invoke a deployed model, and inspect a baseline response. |
+| 9:00-9:15 | Welcome and workshop orientation | Review the objectives, working approach, maintenance scenario, and expected outcomes. |
+| 9:15-9:50 | Agentic AI and Microsoft Foundry foundations | Introduce agents, agentic architecture, Microsoft Foundry, and model-selection considerations. |
+| 9:50-10:20 | Hands-on: Foundry foundations and model access | Connect to Foundry, authenticate without API keys, invoke a model, and inspect a baseline response. |
 | 10:20-10:35 | Break |  |
-| 10:35-11:05 | Building agents with Foundry Agent Service, Foundry Toolkit, and Microsoft Agent Framework | Explore the development experience, framework choices, agent lifecycle, and the relationship between local development and managed hosting. |
-| 11:05-11:30 | Tools and enterprise connectivity | Review function tools, Toolboxes, MCP, OpenAPI, A2A, and governed connectivity patterns. Includes a short tools demonstration. |
-| 11:30-12:30 | Hands-on: Structured outputs and deterministic tools | Make model responses consistent and checkable, validate structured output, add read-only asset and inventory tools, and enforce an application-controlled tool boundary. |
-| 12:30-1:15 | Lunch |  |
-| 1:15-1:50 | Enterprise knowledge, RAG, Azure AI Search, and Foundry IQ | Compare grounding approaches, retrieval strategies, hybrid search, Foundry IQ knowledge bases, source permissions, and memory concepts. Includes a retrieval demonstration. |
-| 1:50-3:00 | Hands-on: Azure AI Search and Foundry IQ grounding | Create a Search index, compare keyword, vector, and hybrid retrieval, build a Foundry IQ knowledge path, and test a grounded agent with citations. |
-| 3:00-3:15 | Break |  |
-| 3:15-3:40 | Hosted agents, multi-agent patterns, and model customization | Review hosted-agent capabilities, common orchestration patterns, when multi-agent design is appropriate, and when to consider RAG versus fine-tuning. |
-| 3:40-4:25 | Hands-on: Multi-agent evidence, planning, and safety review | Build a sequential workflow with an evidence analyst, maintenance planner, and safety reviewer while keeping approval and action authority with a person. |
-| 4:25-4:45 | Operating agents responsibly | Introduce tracing, evaluation, monitoring, optimization, content safety, prompt-injection defenses, and guardrails. Includes an operations demonstration. |
-| 4:45-5:20 | Hands-on: Tracing, evaluation, and promotion | Inspect workflow traces, run evaluation cases, measure safety and quality, and apply a repeatable promotion gate. |
-| 5:20-5:30 | Day 1 recap and Day 2 preparation | Summarize the reference architecture, capture questions, and introduce the use-case design goals for Day 2. |
+| 10:35-11:00 | Foundry Agent Service and Foundry Toolkit | Explore the agent development lifecycle, development tools, project organization, and managed services. |
+| 11:00-11:35 | Tools and enterprise connectivity | Review function tools, Toolboxes, MCP, OpenAPI, A2A, governed system integration, and the boundaries between model reasoning and deterministic operations. |
+| 11:35-12:50 | Hands-on: Structured outputs and deterministic tools | Validate structured model responses and add controlled, read-only asset and inventory tools. |
+| 12:50-1:35 | Lunch |  |
+| 1:35-2:30 | Enterprise knowledge and retrieval | Explore grounding and RAG patterns, retrieval strategies, Azure AI Search, Foundry IQ, memory, and when fine-tuning is appropriate. Compare the choices through practical enterprise examples. |
+| 2:30-4:00 | Hands-on: Azure AI Search and Foundry IQ grounding | Build a Search index, compare retrieval methods, create a knowledge base, and test grounded answers with citations. |
+| 4:00-4:15 | Break |  |
+| 4:15-4:30 | Day 1 recap | Review the solution built during Day 1 and prepare for multi-agent development on Day 2. |
 
-## Day 2: Envision and Prioritize OPG Use Cases
+## Day 2: Multi-Agent Systems, Governance, and Collaborative Solution Design
 
-**Estimated time:** 9:00 AM-4:15 PM, including lunch and breaks
+**Estimated time:** 9:00 AM-4:30 PM, including lunch and breaks
 
 | Time | Session | What participants will learn or do |
 |---|---|---|
-| 9:00-9:15 | Day 1 recap and Day 2 goals | Connect the technical patterns from Day 1 to OPG opportunities and confirm the desired outcomes for the day. |
-| 9:15-9:45 | Opportunity framing | Identify target users, business problems, current pain points, and decisions or tasks that could benefit from an AI assistant. |
-| 9:45-10:30 | Use-case discovery | Develop candidate use cases from participant ideas or the provided starter scenarios, including maintenance recommendations, incident triage, shift handover, policy navigation, spare-parts planning, and change readiness. |
-| 10:30-10:45 | Break |  |
-| 10:45-11:30 | Data, knowledge, tools, and integration readiness | Map the required data and systems, including work orders, operational records, procedures, SharePoint, Azure Blob Storage, APIs, and human workflows. Identify access, quality, and ownership gaps. |
-| 11:30-12:15 | Prioritization | Compare candidates by business value, feasibility, data readiness, risk, measurable outcomes, and suitability for an initial prototype. Select the strongest opportunities. |
-| 12:15-1:00 | Lunch |  |
-| 1:00-1:45 | Target solution and responsible AI boundaries | Define the proposed agent experience, grounding approach, tools, orchestration pattern, evaluation needs, and decisions that must remain under human control. |
-| 1:45-2:45 | Team design session | Create a concise concept for each selected use case, including the user journey, required data, agent responsibilities, success measures, risks, and prototype scope. |
-| 2:45-3:00 | Break |  |
-| 3:00-3:45 | Team share-outs and feedback | Present each concept, challenge assumptions, identify common platform capabilities, and refine the recommendations. |
-| 3:45-4:15 | Roadmap and next steps | Agree on priority use cases, owners, discovery actions, technical spikes, data preparation, governance needs, and the path to a proof of concept. |
+| 9:00-9:15 | Day 1 recap and Day 2 objectives | Connect the grounded agent built on Day 1 to multi-agent orchestration and responsible operation. |
+| 9:15-9:55 | Hosted agents and Microsoft Agent Framework | Explore managed hosting, the Microsoft Agent Framework development model, and sequential, concurrent, handoff, group-chat, and Magentic patterns. |
+| 9:55-10:55 | Hands-on: Multi-agent evidence, planning, and safety review | Build a workflow with an evidence analyst, maintenance planner, and safety reviewer while preserving human decision authority. |
+| 10:55-11:10 | Break |  |
+| 11:10-11:50 | Governance and responsible agent operations | Cover tracing, monitoring, evaluation, identity, content safety, prompt-injection defenses, guardrails, and accountable human decision boundaries. |
+| 11:50-12:40 | Hands-on: Tracing, evaluation, and promotion | Inspect traces, run evaluation scenarios, measure quality and safety, and apply a promotion gate. |
+| 12:40-1:25 | Lunch |  |
+| 1:25-1:40 | Group challenge briefing | Form teams, assign use cases, introduce the whiteboard template, and explain final presentation expectations. |
+| 1:40-2:05 | Step 1: Define the use case | Identify the user, business problem, current workflow, pain points, desired outcome, and measurable value. |
+| 2:05-2:35 | Step 2: Break apart the solution | Map data, knowledge sources, business tools, integrations, user interactions, and human decisions. |
+| 2:35-2:50 | Break |  |
+| 2:50-3:35 | Step 3: Design the target architecture | Select the agent pattern, models, grounding approach, tools, memory, hosting, identity, and integration architecture. |
+| 3:35-3:55 | Step 4: Validate the design | Identify risks, guardrails, evaluation criteria, human approval boundaries, assumptions, and prototype scope. |
+| 3:55-4:20 | Group presentations | Present each use case, proposed architecture, key decisions, risks, and recommended next steps. |
+| 4:20-4:30 | Workshop close | Confirm key takeaways, owners, and follow-up actions. |
