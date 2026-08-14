@@ -2,6 +2,16 @@
 
 **Duration:** 60 minutes | **Skill level:** Intermediate
 
+## Your Part In The User Story
+
+> As the authorized OPG reviewer, I want to see the evidence, proposed next steps, missing information, and safety concerns in one clear package so that I can make an informed decision about the recommendation.
+
+**You build:** A three-step workflow in which the evidence analyst organizes what is known and missing, the maintenance planner uses that evidence to propose next steps, and the safety reviewer checks whether the package is complete and safe enough to show to a person.
+
+**Why it matters:** The AI agents prepare and check the recommendation, but they cannot approve it. Only an authorized person can approve or reject a complete package, and that decision does not itself start or authorize maintenance work.
+
+The human title is intentionally generic for the workshop and must be mapped to OPG's actual accountable role and process before production use. This is the human-review increment of the [complete workshop user story](../docs/WORKSHOP-USER-STORY.md).
+
 ## What You Will Build
 
 A Microsoft Agent Framework workflow in which each agent creates one distinct artifact:
@@ -33,7 +43,22 @@ There is no model-owned approval state machine. The reviewer answers one questio
 
 If `ready_for_human` is `false`, the application displays the findings and stops. If it is `true`, a person may record `approve` or `reject`. Neither choice executes maintenance work.
 
-The workflow uses `SequentialBuilder` with the repository's pinned Agent Framework packages. It uses `OpenAIChatClient` directly to preserve the `azure-ai-projects==2.4.0` contract.
+### Evidence Analyst Versus Maintenance Planner
+
+The simplest distinction is:
+
+> The evidence analyst explains **what the available information tells us**. The maintenance planner proposes **what should be considered next based on that information**.
+
+For the fictional `ASSET-104` issue:
+
+| Role | Question it answers | Example output |
+|---|---|---|
+| Evidence analyst | What do the records support, contradict, or leave unanswered? | The pump has a reported seal leak; the retrieved procedures conflict on revision; the latest vibration reading is missing. |
+| Maintenance planner | Given that evidence and uncertainty, what should the authorized reviewer consider doing next? | Verify the current procedure revision and obtain the missing vibration reading before deciding whether to schedule maintenance. |
+
+The evidence analyst does not recommend work. The planner does not reopen the raw records, invent missing facts, or decide whether work is approved. Keeping the roles separate makes it possible for the safety reviewer to compare the recommendation with the evidence that was actually available.
+
+The workflow uses `SequentialBuilder` with the repository's pinned Agent Framework packages. `FoundryChatClient` provides the native Microsoft Foundry project, credential, and model integration.
 
 ## Why Three Agents?
 
@@ -186,15 +211,19 @@ Run the offline tests:
 python -m unittest tests.test_lab_04_approval tests.test_lab_04_workflow -v
 ```
 
-## Step 4: Understand Foundry Authentication
+## Step 4: Understand the Foundry Client
 
 The starter uses:
 
 ```python
-get_bearer_token_provider(credential, "https://ai.azure.com/.default")
+FoundryChatClient(
+       project_endpoint=project_endpoint,
+       model=model_name,
+       credential=credential,
+)
 ```
 
-The project-scoped `services.ai.azure.com/api/projects/...` endpoint expects a Microsoft Foundry data-plane token. The token provider is passed through `OpenAIChatClient(api_key=...)` to retain OpenAI-compatible `/openai/v1` routing. An async wrapper is required because `AsyncOpenAI` awaits callable API-key providers.
+`FoundryChatClient` is the Microsoft Agent Framework integration for a Foundry project. It accepts the project endpoint and Azure credential directly, then owns the correct Foundry authentication and model-client routing. Keeping this integration behind `build_foundry_chat_client()` makes the workflow easy to test without replacing the real client in production code.
 
 ## Step 5: Run the Solution
 
@@ -226,9 +255,8 @@ action_authority = none
 
 ## Troubleshooting
 
-- HTTP 401 with an incorrect audience: confirm `FOUNDRY_TOKEN_SCOPE` is `https://ai.azure.com/.default`.
-- HTTP 400 about `api-version`: pass the token provider through `api_key`, not `credential`.
-- Token string cannot be awaited: return the async wrapper from `foundry_token_provider()`.
+- HTTP 401: rerun `az login` and confirm the signed-in identity has access to the Foundry project.
+- Project endpoint error: use the full project endpoint ending in `/api/projects/<project-name>`.
 - Reviewer JSON validation failure: inspect the raw final workflow text and reinforce the JSON-only contract.
 - Model deployment not found: use the deployment name in `FOUNDRY_MODEL_NAME`.
 

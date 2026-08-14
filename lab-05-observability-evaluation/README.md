@@ -2,6 +2,16 @@
 
 **Duration:** 60 minutes | **Skill level:** Intermediate
 
+## Your Part In The User Story
+
+> As a member of the team responsible for the assistant, I want to test how it behaves in both normal and unsafe situations so that we can find failures before deciding whether it is ready for wider use.
+
+**You build:** Traces that show what happened during each run, repeatable tests for six normal and unsafe situations, and a report that shows whether the assistant passed the required checks.
+
+**Why it matters:** One successful demonstration does not prove that the assistant is dependable. The team needs repeatable evidence that it handles missing information, conflicting procedures, malicious instructions, unauthorized requests, and tool failures correctly.
+
+This is the quality-gate increment of the [complete workshop user story](../docs/WORKSHOP-USER-STORY.md).
+
 ## What You Will Build
 
 An observability and quality gate around the maintenance workflow:

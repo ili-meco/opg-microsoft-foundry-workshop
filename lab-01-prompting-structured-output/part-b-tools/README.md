@@ -4,6 +4,16 @@
 
 This is Part B of [Lab 01: Structured Outputs and Deterministic Tools](../README.md). Part A made the final model response predictable and validated. Part B adds controlled access to current business facts.
 
+## Your Part In The User Story
+
+> As an OPG employee, I want the assistant to look up the equipment record and parts availability so that its assessment is based on current information rather than assumptions.
+
+**You build:** Two controlled, read-only tools that let the assistant retrieve the fictional equipment record and check whether installed parts are in stock.
+
+**Why it matters:** The model no longer has to guess these facts. The application still decides which lookups are allowed, validates every request, and prevents the assistant from changing inventory or work orders.
+
+This is the controlled-facts increment of the [complete workshop user story](../../docs/WORKSHOP-USER-STORY.md).
+
 ## What You Will Build
 
 A Foundry prompt agent that can look up synthetic asset master data and parts inventory through two local, read-only functions.

@@ -2,6 +2,18 @@
 
 **Duration:** 90 minutes | **Skill level:** Intermediate
 
+## Your Part In The User Story
+
+> As an OPG employee, I want the assistant to find the relevant maintenance procedures and show where each piece of information came from so that I can verify the evidence behind its recommendation.
+
+**You build:** A searchable collection of fictional maintenance documents and a Foundry IQ connection that lets the assistant retrieve relevant passages and cite their sources.
+
+**Why it matters:** A recommendation should be traceable to the procedures and records that support it. A retrieved document can still be outdated, conflicting, incomplete, or untrusted, so every citation must be reviewed.
+
+**Scope boundary:** This lab uses procedures as evidence for work planning and review. The assistant does not present step-by-step instructions to a field worker or authorize anyone to perform maintenance.
+
+This is the procedural-evidence increment of the [complete workshop user story](../docs/WORKSHOP-USER-STORY.md).
+
 ## What You Will Build
 
 This lab has two deliberately separate paths:
@@ -135,7 +147,7 @@ Smaller supported vectors can reduce storage and query work, but that is an opti
 
 ### Where do I find the Foundry project resource ID?
 
-The resource ID identifies the exact project in Azure Resource Manager. The script needs it only because the pinned `azure-ai-projects==2.4.0` client can list and read project connections but cannot create or delete this `RemoteTool` connection. The script therefore sends an authenticated ARM request to this path:
+The resource ID identifies the exact project in Azure Resource Manager. The script needs it only because the pinned `azure-ai-projects==2.3.0` client can list and read project connections but cannot create or delete this `RemoteTool` connection. The script therefore sends an authenticated ARM request to this path:
 
 ```text
 {FOUNDRY_PROJECT_RESOURCE_ID}/connections/{connection-name}

@@ -9,15 +9,13 @@ from pathlib import Path
 from typing import Literal
 
 from agent_framework import Agent
-from agent_framework.openai import OpenAIChatClient
+from agent_framework.foundry import FoundryChatClient
 from agent_framework.orchestrations import SequentialBuilder
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
 from approval_gate import HumanReviewPacket, parse_review_packet, record_human_decision
 
-
-FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"
 
 EVIDENCE_ANALYST_INSTRUCTIONS = """You are the OPG maintenance evidence analyst.
 Extract operational facts, current cited evidence, conflicts, and missing information from
@@ -57,31 +55,16 @@ Never wrap the JSON in markdown.
 """
 
 
-def foundry_openai_base_url(project_endpoint: str) -> str:
-    """Return the OpenAI v1 route derived by the Foundry project client."""
-    return f"{project_endpoint.rstrip('/')}/openai/v1/"
-
-
-def foundry_token_provider(credential: DefaultAzureCredential):
-    """Return a token provider scoped to the Microsoft Foundry data plane."""
-    sync_provider = get_bearer_token_provider(credential, FOUNDRY_TOKEN_SCOPE)
-
-    async def get_token() -> str:
-        return sync_provider()
-
-    return get_token
-
-
 def build_foundry_chat_client(
     project_endpoint: str,
     model_name: str,
     credential: DefaultAzureCredential,
-) -> OpenAIChatClient:
-    """Build the OpenAI-compatible client for a Foundry project endpoint."""
-    return OpenAIChatClient(
+) -> FoundryChatClient:
+    """Build the native MAF client for a Foundry project endpoint."""
+    return FoundryChatClient(
+        project_endpoint=project_endpoint,
         model=model_name,
-        api_key=foundry_token_provider(credential),
-        base_url=foundry_openai_base_url(project_endpoint),
+        credential=credential,
     )
 
 

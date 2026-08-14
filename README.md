@@ -4,6 +4,24 @@ Build an enterprise Work Order Maintenance Assistant progressively through a ful
 
 See the [complete workshop outcome architecture](ARCHITECTURE.md) for the end-state component map, runtime flow, trust boundaries, and lab-by-lab build sequence.
 
+Read the [complete workshop user story](docs/WORKSHOP-USER-STORY.md) for the synthetic scenario, the authorized human review role, and the capability participants add in each lab.
+
+## The Story You Will Build
+
+> As an OPG employee reviewing an equipment issue, I want an AI assistant to gather the relevant equipment details, parts availability, maintenance procedures, and work-order history so that I can prepare an evidence-based recommendation for an authorized person to review.
+
+This is a **work-planning and review assistant**. It:
+
+- Reviews a reported equipment issue.
+- Collects equipment, inventory, and procedural evidence.
+- Identifies missing or conflicting information.
+- Proposes next steps.
+- Prepares a package for an authorized human reviewer.
+
+It is not a field-worker assistant that provides instructions for performing maintenance. Lab 03 retrieves procedures as evidence supporting a recommendation; it does not tell a worker how to complete a maintenance task.
+
+The assistant develops one capability at a time. It never approves or executes maintenance work. In Lab 04, an authorized OPG work-management or maintenance decision-maker may approve or reject a ready recommendation; that recorded decision still grants no authority to update work orders, reserve inventory, return equipment to service, or control equipment.
+
 ## Ready Labs
 
 Complete the labs in order. Each stage adds one explicit capability and control boundary to the same maintenance-assistant scenario.

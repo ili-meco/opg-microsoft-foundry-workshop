@@ -2,12 +2,22 @@
 
 **Duration:** 45 minutes | **Skill level:** Beginner
 
+## Your Part In The User Story
+
+> As an OPG employee, I want an AI model to review an equipment issue so that I can see what it can determine before it is given maintenance records, operating procedures, or access to other systems.
+
+**You build:** A small Python application that signs in securely, connects to Microsoft Foundry, and asks an AI model to review the fictional `ASSET-104` equipment issue.
+
+**Why it matters:** This first response is the baseline for the workshop. It shows what the model can produce without current equipment data, maintenance history, or procedures, and why a plausible answer is not yet a trustworthy recommendation.
+
+This lab is the first increment of the [complete workshop user story](../docs/WORKSHOP-USER-STORY.md).
+
 ## What You Will Build
 
 A small Python client that authenticates with Microsoft Entra ID, connects to your team project, invokes an approved model deployment through the Foundry project endpoint, and optionally compares a second deployment.
 
 ```text
-Technician request
+Recorded condition
        |
        v
 Python workshop client -- Entra ID --> Microsoft Foundry project

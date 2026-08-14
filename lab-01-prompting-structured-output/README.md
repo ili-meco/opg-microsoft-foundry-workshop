@@ -2,6 +2,26 @@
 
 **Duration:** 90 minutes | **Skill level:** Beginner to intermediate
 
+## Your Part In The User Story
+
+### Part A: Make The Assessment Predictable
+
+> As a developer building the assistant, I want every assessment to use the same clearly defined fields so that the application can reliably display, check, and test the result.
+
+**You build:** A Pydantic model that requires the AI response to separate known facts, assumptions, risks, missing information, and recommended next steps.
+
+**Why it matters:** A predictable structure lets the application validate and use the answer safely. It also makes errors easier to spot, although a correctly formatted answer can still contain unsupported claims.
+
+### Part B: Add Controlled Operational Facts
+
+> As an OPG employee, I want the assistant to look up the equipment record and parts availability so that its assessment is based on current information rather than assumptions.
+
+**You build:** Two controlled, read-only tools that let the assistant retrieve the fictional equipment record and check whether installed parts are in stock.
+
+**Why it matters:** The model no longer has to guess these facts. The application still decides which lookups are allowed, validates every request, and prevents the assistant from changing inventory or work orders.
+
+These are the next two increments of the [complete workshop user story](../docs/WORKSHOP-USER-STORY.md).
+
 This combined lab has two parts:
 
 1. **Part A: Structured outputs** makes the model's final assessment predictable and validates it as application data.

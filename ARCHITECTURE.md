@@ -4,11 +4,17 @@ The workshop progressively builds an **OPG Work Order Maintenance Assistant**: a
 
 The outcome is a reference architecture and working prototype, not a production connection to operational technology. Workshop data and business systems remain synthetic and read-only.
 
+## Solution Scope
+
+This is a **work-planning and review assistant**. It reviews a reported equipment issue, gathers equipment and inventory facts, retrieves procedural evidence, identifies gaps or conflicts, proposes next steps, and prepares a package for an authorized human reviewer.
+
+It is not a field-worker assistant for performing maintenance. Procedures are retrieved as evidence supporting a planning recommendation, not presented as step-by-step work instructions. A field-worker solution would need a separate architecture for worker authorization, assigned work orders, procedure revision control, prerequisites, hold points, and acknowledgements.
+
 ## End-State Architecture
 
 ```mermaid
 flowchart LR
-    user[Maintenance planner or technician]
+    user[OPG employee reviewing an equipment issue]
 
     subgraph client[Workshop application boundary]
         app[Python maintenance assistant]
@@ -106,13 +112,13 @@ The final assistant does not ask one model to do everything. It separates probab
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Planner or technician
+    actor User as Work-management user
     participant App as Python application
     participant Agent as Maintenance agent
     participant Tools as Read-only business tools
     participant IQ as Foundry IQ knowledge base
     participant Review as Safety reviewer
-    participant Human as Human approver
+    participant Human as Authorized human reviewer
 
     User->>App: Submit maintenance question
     App->>App: Validate request and user context
@@ -131,9 +137,9 @@ sequenceDiagram
     Agent->>Review: Submit draft recommendation and evidence
     Review-->>Agent: Return safety findings and required corrections
     Agent-->>App: Return cited recommendation and uncertainty
-    App->>Human: Request approval for consequential next action
-    Human-->>App: Approve, reject, or revise
-    App-->>User: Present approved result and audit context
+    App->>Human: Present ready recommendation for decision
+    Human-->>App: Approve or reject recommendation
+    App-->>User: Present decision record and audit context
 ```
 
 ### Result Contract
@@ -143,7 +149,7 @@ The final response should contain:
 1. **Observed facts** from validated tool results.
 2. **Procedural evidence** with citations from Foundry IQ.
 3. **Conflicts or missing evidence**, including a clear `I don't know` when needed.
-4. **Recommended planner action** that does not claim authorization it lacks.
+4. **Recommended work-management action** that does not claim authorization it lacks.
 5. **Safety-review readiness** and any findings that require correction or escalation.
 6. **Human decision** for recommendations that are ready for review.
 

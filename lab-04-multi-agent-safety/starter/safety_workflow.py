@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 from agent_framework import Agent
-from agent_framework.openai import OpenAIChatClient
+from agent_framework.foundry import FoundryChatClient
 from agent_framework.orchestrations import SequentialBuilder
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-
-
-FOUNDRY_TOKEN_SCOPE = "https://ai.azure.com/.default"
+from azure.identity import DefaultAzureCredential
 
 EVIDENCE_ANALYST_INSTRUCTIONS = """Extract facts, current evidence, conflicts, and gaps.
 Return an EvidencePacket for the planner. Do not recommend or authorize actions.
@@ -25,28 +22,15 @@ Return only the strict HumanReviewPacket JSON described in the participant guide
 """
 
 
-def foundry_openai_base_url(project_endpoint: str) -> str:
-    return f"{project_endpoint.rstrip('/')}/openai/v1/"
-
-
-def foundry_token_provider(credential: DefaultAzureCredential):
-    sync_provider = get_bearer_token_provider(credential, FOUNDRY_TOKEN_SCOPE)
-
-    async def get_token() -> str:
-        return sync_provider()
-
-    return get_token
-
-
 def build_foundry_chat_client(
     project_endpoint: str,
     model_name: str,
     credential: DefaultAzureCredential,
-) -> OpenAIChatClient:
-    return OpenAIChatClient(
+) -> FoundryChatClient:
+    return FoundryChatClient(
+        project_endpoint=project_endpoint,
         model=model_name,
-        api_key=foundry_token_provider(credential),
-        base_url=foundry_openai_base_url(project_endpoint),
+        credential=credential,
     )
 
 
