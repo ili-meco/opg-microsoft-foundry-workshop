@@ -1,0 +1,38 @@
+{
+  "request": "Assess ASSET-104 and recommend the planner's next action.",
+  "operational_facts": {
+    "asset_id": "ASSET-104",
+    "status": "maintenance_required",
+    "observations": [
+      "Increasing vibration",
+      "Visible seal leak"
+    ],
+    "installed_parts": [
+      "PART-200",
+      "PART-310"
+    ],
+    "inventory": {
+      "PART-200": "available",
+      "PART-310": "low_stock"
+    }
+  },
+  "retrieved_evidence": [
+    {
+      "title": "Centrifugal Pump Inspection Procedure",
+      "revision": "R3",
+      "effective_date": "2026-06-15",
+      "extract": "Escalate increasing vibration with visible leakage. Inspect before planning continued operation. Record current vibration and leak-rate measurements."
+    },
+    {
+      "title": "Stock Reservation Policy",
+      "revision": "R2",
+      "effective_date": "2026-04-10",
+      "extract": "Low-stock parts require planner review. This assistant cannot reserve inventory."
+    }
+  ],
+  "constraints": [
+    "No equipment control",
+    "No work-order approval or update",
+    "No inventory reservation"
+  ]
+}
