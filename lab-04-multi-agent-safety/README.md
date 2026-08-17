@@ -282,17 +282,25 @@ Remove-Item $variant
 
 Part B uses the Foundry Toolkit's official workflow template to create the hosting project. Do not build or copy `azure.yaml`, `.foundry`, `.vscode`, or the hosting dependencies by hand; the template owns those files.
 
+Part A uses a prebuilt assessment package to make the analyst-to-planner handoff visible and repeatable. A person should not have to construct that JSON to use the hosted agent. Part B therefore adds a conversational intake boundary: the user asks an ordinary maintenance question, and the analyst uses read-only tools over bundled synthetic workshop knowledge to assemble the evidence packet internally.
+
 The deployment boundary is:
 
 ```text
-caller -> hosted analyst -> planner -> safety reviewer -> HumanReviewPacket candidate
-                                                        |
-                                              caller validates JSON
-                                                        |
-                                         authorized human approve/reject
+natural-language question
+           |
+           v
+hosted analyst -> read-only asset, inventory, and procedure tools
+           |
+           v
+    EvidencePacket -> planner -> safety reviewer -> HumanReviewPacket candidate
+                                                                 |
+                                                     caller validates JSON
+                                                                 |
+                                               authorized human approve/reject
 ```
 
-The hosted agent prepares the review packet. It does not prompt for, store, or execute the human decision.
+The hosted agent prepares the review packet. It does not prompt for, store, or execute the human decision. The response remains structured JSON even though the input is conversational because a calling application must be able to validate the readiness and authority fields before showing a recommendation to a human.
 
 **Instructor preflight:** Before offering Part B, deploy and smoke-test the model used by the generated workflow template, confirm hosted-agent quota, and confirm participants can deploy to the shared project. Participants should reuse that deployment rather than create models during the lab.
 
@@ -318,12 +326,22 @@ Confirm the installation by pressing `Ctrl+Shift+P` and running **View: Show Fou
 
 Create the agent in a new empty sibling folder named with `HOSTED_AGENT_NAME` from your generated `.env`, such as `opg26a-mt-maintenance-agent`. Keeping the hosted project outside this workshop workspace prevents its generated files from colliding with the lab files.
 
-1. Press `Ctrl+Shift+P` and run **Foundry Toolkit: Create new Hosted Agent**.
-2. Select the folder you created for the hosted-agent project if prompted.
-3. Select the existing workshop Foundry project when prompted.
-4. Choose **Workflow agent (Responses, Agent Framework, Python)**.
-5. Keep **Code** deployment and the generated Python 3.13 runtime.
-6. Use `HOSTED_AGENT_NAME` for the hosted-agent name and `AZURE_ENV_NAME` for the `azd` environment whenever the Toolkit prompts for them.
+1. Open Foundry Toolkit and expand the workshop Foundry project under **My Resources**.
+2. Select the project's **Agents** resource.
+3. Select the **Hosted Agent** tab.
+4. Click **+ Add Hosted Agent**.
+
+![Foundry Toolkit Agents page with the Agents resource, Hosted Agent tab, and Add Hosted Agent button highlighted.](images/foundry-toolkit-hosted-agent-gallery.png)
+
+5. On **Create Hosted Agent from Sample**, select **Agent Framework** under **Framework**.
+6. Select **Multi-Agent Workflow (Agent Framework...)**, then click **Next**.
+
+![Create Hosted Agent from Sample page with the Agent Framework filter and Multi-Agent Workflow sample highlighted.](images/foundry-toolkit-multi-agent-workflow-sample.png)
+
+7. Select the new empty sibling folder you created for the hosted-agent project if prompted.
+8. Select the existing workshop Foundry project when prompted.
+9. Keep **Code** deployment and the generated Python 3.13 runtime.
+10. Use `HOSTED_AGENT_NAME` for the hosted-agent name and `AZURE_ENV_NAME` for the `azd` environment whenever the Toolkit prompts for them.
 
 The template creates the structure shown by the Toolkit, including:
 
@@ -336,6 +354,15 @@ src/<generated-agent-folder>/
 azure.yaml
 ```
 
+Not seeing `.venv` at this point is expected. The Toolkit creates the files that define and host the agent, but a Python virtual environment is local developer state and is created separately before the first local run. Create it inside `src/<generated-agent-folder>/`, beside `main.py` and `requirements.txt`; a `.venv` at the project root is the wrong environment for this generated service.
+
+Do not confuse the two similarly named folders:
+
+| Item | Purpose |
+|---|---|
+| `.env` | Text configuration such as the Foundry project endpoint and model deployment name. It does not contain Python or install packages. |
+| `.venv` | An isolated Python interpreter and the packages needed to run and debug this hosted agent locally. |
+
 The picker uses the same curated catalog as `azd ai agent sample list`. The template manifest is `samples/python/hosted-agents/agent-framework/responses/05-workflows/azure.yaml` in the official `microsoft-foundry/foundry-samples` repository.
 
 ### Step B2: Replace Only the Sample Workflow
@@ -347,19 +374,68 @@ The generated host uses `AZURE_AI_MODEL_DEPLOYMENT_NAME`; Part A uses `FOUNDRY_M
 Compare the replacement with Part A:
 
 - `FoundryChatClient` still connects MAF to the Foundry project.
+- The analyst receives natural-language messages and has three read-only tools: `get_asset`, `get_parts_inventory`, and `search_maintenance_knowledge`.
+- The synthetic workshop records are bundled in `main.py` so the generated hosted project remains a one-file replacement. In production, these functions would call governed asset and inventory APIs plus Azure AI Search or Foundry IQ instead of in-memory records.
 - `WorkflowBuilder` and `AgentExecutor` use the hosting template's workflow pattern.
 - `context_mode="full"` lets the reviewer inspect the original input, EvidencePacket, and planner draft. The template's slogan example uses `last_agent`, which is too narrow for this safety review.
 - `output_executors=[reviewer_executor]` prevents intermediate drafts from becoming the hosted response.
 - `ResponsesHostServer` exposes the workflow through the Foundry Responses protocol.
 - No `input()` or approval function runs inside the hosted agent.
 
-### Step B3: Run in Agent Inspector
+### Step B3: Optional Local Run in Agent Inspector
 
-1. Create or select the Python virtual environment when prompted.
-2. Install the generated `requirements.txt` if the template has not already done so.
-3. Press `F5`. The generated debug configuration starts the host and opens Agent Inspector.
-4. Paste the contents of `data/assessment_package.json` into the Inspector.
-5. Confirm that the final response is one JSON object with `requires_human_decision=true` and `action_authority="none"`.
+You may deploy without a local run. Local testing is recommended because it catches dependency, environment, and startup errors before the remote build. The post-deployment smoke test in Step B4 is required.
+
+Create the local environment explicitly; a prompt is not guaranteed. From the generated hosted-agent project root, where `azure.yaml` is visible, run:
+
+```powershell
+Set-Location .\src\<generated-agent-folder>
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install debugpy
+Set-Location ..\..
+```
+
+Replace `<generated-agent-folder>` with the actual folder name shown under `src`. In the screenshot example, it is the folder that contains `.env`, `main.py`, and `requirements.txt`.
+
+If PowerShell blocks activation, allow local scripts for the current terminal only, then activate again:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\src\<generated-agent-folder>\.venv\Scripts\Activate.ps1
+```
+
+The environment belongs in the service folder because the generated debug task runs `main.py` from that folder. The task uses VS Code's selected interpreter through `${command:python.interpreterPath}`; activation in one terminal does not automatically guarantee that `F5` selected the same interpreter.
+
+Select it explicitly:
+
+1. Press `Ctrl+Shift+P` and run **Python: Select Interpreter**.
+2. Choose the interpreter ending in `src\<generated-agent-folder>\.venv\Scripts\python.exe`.
+3. If it is not listed, choose **Enter interpreter path**, then browse to that file.
+
+Verify the selected environment from a new VS Code terminal opened at the project root:
+
+```powershell
+.\src\<generated-agent-folder>\.venv\Scripts\python.exe -c "import agent_framework, agent_framework_foundry_hosting, debugpy; print('Hosted-agent environment ready')"
+```
+
+When that prints `Hosted-agent environment ready`:
+
+1. Press `F5`. The generated debug configuration starts the host on port `8088`, attaches the debugger on port `5679`, and opens Agent Inspector.
+2. Send this natural-language message:
+
+```text
+ASSET-104 has increasing vibration and a visible seal leak. What should the planner verify before deciding on continued operation?
+```
+
+3. Confirm that the response uses the current R3 pump procedure, identifies measurements that are still needed, and does not claim that the assistant made the continued-operation decision.
+4. Confirm that the final response is one JSON object with `requires_human_decision=true` and `action_authority="none"`.
+
+The agent, not the user, now builds the evidence packet. In the Inspector trace, look for asset, inventory, and maintenance-knowledge tool calls before the planner and reviewer output.
+
+The `.venv` is for local development only. It is ignored by source control and is not uploaded as the hosted agent; Azure installs the dependencies declared in `requirements.txt` into the Python 3.13 hosted runtime during deployment.
 
 The official workflow template currently recommends a stronger model for continuing a workflow from prior assistant messages and is tested with the model declared by its generated manifest. Use the template-selected or instructor-validated deployment; do not silently replace it with another model without repeating the local smoke test.
 
@@ -369,16 +445,31 @@ The official workflow template currently recommends a stronger model for continu
 2. Run **Foundry Toolkit: Deploy Hosted Agent**.
 3. Select **Code**, confirm the generated agent name and runtime, then choose **Review + Deploy**.
 4. After deployment, invoke the agent in the Agent Playground and inspect its logs.
-5. Submit the same assessment package and compare the remote response with the local result.
+5. Start a chat with these messages one at a time:
 
-Deployment is complete when the remote endpoint returns the reviewer packet and still exposes no approval or action capability. A production caller must validate the response with the strict `HumanReviewPacket` contract from `solution/approval_gate.py` before offering an authorized person the separate approve/reject action.
+```text
+ASSET-104 has increasing vibration and a visible seal leak. What should the planner verify before deciding on continued operation?
+```
+
+```text
+Check the stock position for the parts installed on ASSET-104. Can you reserve anything that is low stock?
+```
+
+```text
+Assess ASSET-999 and tell me whether it is ready for a maintenance decision.
+```
+
+The first response should ground its recommendation in the pump records and current procedure. The second should report stock facts but refuse to reserve inventory. The third should treat the unknown asset as missing evidence rather than inventing a record. Every response should preserve `action_authority="none"`.
+
+Deployment is complete when participants can send ordinary maintenance questions, observe grounded tool use, receive the reviewer packet, and confirm that the agent still exposes no approval or action capability. A production caller must validate the response with the strict `HumanReviewPacket` contract from `solution/approval_gate.py` before offering an authorized person the separate approve/reject action.
 
 ## Troubleshooting
 
 - HTTP 401: rerun `az login` and confirm the signed-in identity has access to the Foundry project.
 - Project endpoint error: use the full project endpoint ending in `/api/projects/<project-name>`.
 - Reviewer JSON validation failure: inspect the raw final workflow text and reinforce the JSON-only contract.
-- Model deployment not found: use the deployment name in `FOUNDRY_MODEL_NAME`.
+- Model deployment not found: use the deployment name in `AZURE_AI_MODEL_DEPLOYMENT_NAME` for the generated hosted project.
+- Invented asset or inventory facts: confirm the analyst has all three read-only tools and its instructions require tool use for identifiers.
 
 ## Success Criteria
 
@@ -389,5 +480,7 @@ Deployment is complete when the remote endpoint returns the reviewer packet and 
 - [ ] An unready packet cannot receive a human decision.
 - [ ] Every ready recommendation requires explicit human approval or rejection.
 - [ ] No path grants equipment, work-order, or inventory authority.
+- [ ] In Part B, a user sends natural-language questions instead of constructing assessment JSON.
+- [ ] The hosted analyst grounds asset, inventory, and procedure claims through read-only tools.
 - [ ] In Part B, the Toolkit-generated host returns only the reviewer packet.
 - [ ] Human approval remains outside the hosted agent.

@@ -4,6 +4,8 @@
 
 Participants build a three-agent workflow in which each agent creates a distinct artifact. The final model output answers one binary question: is the recommendation ready for a human decision?
 
+Part A deliberately starts from a frozen assessment package so participants can inspect the handoff contract. Part B adds a conversational hosted boundary: participants send normal maintenance questions, while the analyst retrieves synthetic asset, inventory, and procedure evidence through read-only tools. Emphasize that the package is assembled by the application; it is not something an end user should write.
+
 ## Timing
 
 | Activity | Minutes |
@@ -24,6 +26,7 @@ Participants build a three-agent workflow in which each agent creates a distinct
 - `ready_for_human=false` means no human decision is accepted for that packet.
 - Findings explain whether correction, more evidence, or expert help is needed; those explanations are not application states.
 - Human approval records acceptance of a recommendation and still leaves `action_authority="none"`.
+- The hosted chat accepts natural-language questions but grounds facts through read-only tools; conversation is an input experience, not permission to answer from model memory.
 - Production systems also need identity, role checks, durable audit records, expiry, and idempotent write APIs outside the model.
 
 ## Suggested Debrief
