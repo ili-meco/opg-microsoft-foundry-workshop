@@ -43,11 +43,18 @@ configure_otel_providers(
 
 The default Foundry Toolkit gRPC OTLP port is `4317`. Sensitive-data capture is off by default because prompts, tool results, and model output may contain operational data. Enable it only for approved synthetic content.
 
-With Foundry Toolkit's trace receiver running, execute:
+Start Foundry Toolkit's trace receiver before running the workflow:
+
+1. Press `Ctrl+Shift+P` to open the VS Code Command Palette.
+2. Run **Foundry Toolkit: Open Tracing**.
+3. Wait for the tracing view to load and leave it open.
+4. Run:
 
 ```powershell
 python .\lab-05-observability-evaluation\solution\run_traced_workflow.py
 ```
+
+If the runner reports that nothing is listening on `localhost:4317`, reopen **Foundry Toolkit: Open Tracing**, wait for the view to finish loading, and rerun the command. The runner checks the receiver before making model calls, so this setup problem does not produce an untraced workflow run.
 
 Inspect the workflow, evidence analyst, planner, reviewer, and model spans.
 
@@ -85,14 +92,52 @@ The command writes `results/promotion_report.json` and exits with code `0` only 
 
 ## Step 5: Prove the Gate Can Fail
 
-Copy the dataset and change one response to:
+Create a failing copy of the dataset so the original remains unchanged:
 
-- Set `action_authority` to `write`.
-- Remove a required citation.
-- Set `ready_for_human` to `true` for a missing-evidence case.
-- Add a forbidden claim such as `inventory reserved`.
+```powershell
+Copy-Item `
+    .\lab-05-observability-evaluation\data\evaluation_cases.jsonl `
+    .\lab-05-observability-evaluation\data\evaluation_cases-failing.jsonl
+```
 
-Run with `--dataset <copy>`. The process should exit nonzero and identify the failed case and metric.
+Open `lab-05-observability-evaluation/data/evaluation_cases-failing.jsonl`. Each case occupies one line. On the first line, find the case with `"id":"supported-evidence"` and change its citations from:
+
+```json
+"citations":["Centrifugal Pump Inspection Procedure, R3"]
+```
+
+to:
+
+```json
+"citations":[]
+```
+
+Save the file, then run the gate against the failing copy. Use a separate output file so the passing report from Step 4 is not overwritten:
+
+```powershell
+python .\lab-05-observability-evaluation\solution\evaluation_gate.py `
+    --dataset .\lab-05-observability-evaluation\data\evaluation_cases-failing.jsonl `
+    --output .\lab-05-observability-evaluation\results\promotion_report-failing.json
+
+$LASTEXITCODE
+```
+
+The command should return exit code `1`. In `promotion_report-failing.json`, confirm:
+
+- `promoted` is `false`.
+- `failed_cases` contains `supported-evidence`.
+- The `supported-evidence` result lists `citation_behavior` in `failures`.
+- The aggregate `citation_behavior` score is below its required threshold of `1.0`.
+
+This proves that one failed critical case blocks promotion. For additional experiments, restore the failing copy and make one different unsafe change: set `action_authority` to `write`, set `ready_for_human` to `true` where `expected_readiness` is `false`, or add a case-specific forbidden claim such as `inventory reserved` to the recorded response. Rerun the same command and identify the failed metric in the report.
+
+Delete the temporary files when you finish the exercise:
+
+```powershell
+Remove-Item `
+    .\lab-05-observability-evaluation\data\evaluation_cases-failing.jsonl, `
+    .\lab-05-observability-evaluation\results\promotion_report-failing.json
+```
 
 ## Success Criteria
 

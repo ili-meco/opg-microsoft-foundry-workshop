@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 
 import requests
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents.indexes import SearchIndexClient
 from dotenv import load_dotenv
+
+
+WORKSPACE_ROOT = Path(__file__).parents[2]
 
 
 def required_environment(variable: str) -> str:
@@ -18,18 +22,29 @@ def required_environment(variable: str) -> str:
     return value
 
 
+def required_participant_resource(variable: str) -> str:
+    prefix = required_environment("RESOURCE_PREFIX")
+    value = required_environment(variable)
+    if not value.startswith(f"{prefix}-"):
+        raise RuntimeError(
+            f"{variable} must start with '{prefix}-' to avoid changing another "
+            "participant's resources."
+        )
+    return value
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--delete-index", action="store_true")
     args = parser.parse_args()
-    load_dotenv()
+    load_dotenv(WORKSPACE_ROOT / ".env", override=True)
 
     search_endpoint = required_environment("AZURE_SEARCH_ENDPOINT")
     project_resource_id = required_environment("FOUNDRY_PROJECT_RESOURCE_ID")
-    index_name = os.getenv("AZURE_SEARCH_INDEX_NAME", "opg-maintenance-documents")
-    source_name = os.getenv("AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME", "opg-maintenance-source")
-    base_name = os.getenv("AZURE_SEARCH_KNOWLEDGE_BASE_NAME", "opg-maintenance-knowledge")
-    connection_name = os.getenv("FOUNDRY_IQ_CONNECTION_NAME", "opg-maintenance-iq")
+    index_name = required_participant_resource("AZURE_SEARCH_INDEX_NAME")
+    source_name = required_participant_resource("AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME")
+    base_name = required_participant_resource("AZURE_SEARCH_KNOWLEDGE_BASE_NAME")
+    connection_name = required_participant_resource("FOUNDRY_IQ_CONNECTION_NAME")
 
     with DefaultAzureCredential() as credential:
         index_client = SearchIndexClient(endpoint=search_endpoint, credential=credential)

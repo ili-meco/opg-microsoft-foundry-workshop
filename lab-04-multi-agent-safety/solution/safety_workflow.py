@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import os
@@ -120,10 +121,25 @@ async def run_safety_workflow(
     return parse_review_packet(response.text or "")
 
 
-async def _main() -> None:
-    load_dotenv()
-    package_path = Path(__file__).parents[1] / "data" / "assessment_package.json"
+def load_assessment_package(package_path: Path) -> dict:
     assessment_package = json.loads(package_path.read_text(encoding="utf-8"))
+    if not isinstance(assessment_package, dict):
+        raise ValueError("The assessment package must be one JSON object.")
+    return assessment_package
+
+
+async def _main() -> None:
+    default_package_path = Path(__file__).parents[1] / "data" / "assessment_package.json"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--package",
+        type=Path,
+        default=default_package_path,
+        help="Path to the assessment-package JSON file to review.",
+    )
+    args = parser.parse_args()
+    load_dotenv()
+    assessment_package = load_assessment_package(args.package)
 
     review = await run_safety_workflow(assessment_package)
     print("\n=== Human review packet ===")

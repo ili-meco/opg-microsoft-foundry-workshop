@@ -52,11 +52,5 @@ class MaintenanceToolsTests(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["error"]["code"], "unknown_tool")
 
-    def test_tool_schemas_are_strict(self) -> None:
-        for definition in maintenance_tools.TOOL_DEFINITIONS:
-            self.assertFalse(definition["parameters"]["additionalProperties"])
-            self.assertTrue(definition["parameters"]["required"])
-
-
 if __name__ == "__main__":
     unittest.main()

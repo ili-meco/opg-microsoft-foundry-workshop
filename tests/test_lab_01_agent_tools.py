@@ -80,6 +80,21 @@ class FunctionCallResolutionTests(unittest.TestCase):
         self.assertEqual([tool.name for tool in tools], ["get_asset", "get_parts_inventory"])
         self.assertTrue(all(tool.strict for tool in tools))
         self.assertTrue(all(tool.parameters["additionalProperties"] is False for tool in tools))
+        self.assertEqual(tools[0].parameters["required"], ["asset_id"])
+        self.assertEqual(tools[1].parameters["required"], ["part_number"])
+        self.assertEqual(
+            tools[0].parameters["properties"]["asset_id"]["pattern"],
+            "^ASSET-[0-9]{3}$",
+        )
+
+    def test_solution_keeps_the_starter_tool_definition_shape(self) -> None:
+        self.assertEqual(
+            [set(definition) for definition in maintenance_agent.TOOL_DEFINITIONS],
+            [
+                {"name", "description", "parameter_name", "pattern"},
+                {"name", "description", "parameter_name", "pattern"},
+            ],
+        )
 
     def test_terminal_input_retries_blank_and_accepts_exit(self) -> None:
         with (

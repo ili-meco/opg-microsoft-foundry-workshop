@@ -48,32 +48,22 @@ Part A teaches the retrieval engine directly. Part B reuses the finished index a
 | `solution/search_helpers.py` | Defines the index schema, generates document embeddings, and constructs the three query modes. |
 | `solution/01_build_and_search.py` | Creates the index, uploads the corpus, validates vector length, and runs one known-good comparison query. |
 | `starter/search_exercise.py` | Your exercise. Complete three focused TODOs, then query the live index interactively. |
-| `solution/interactive_search.py` | Completed interactive query client to use after attempting the TODOs. |
+| `solution/search_exercise.py` | Direct solution to the starter exercise. It keeps the same structure and completes the three TODOs. |
+| `solution/interactive_search.py` | Alternative completed client that reuses the shared query helper instead of repeating the three builders. |
 | `solution/02_foundry_iq_agent.py` | Adds the knowledge source, knowledge base, MCP project connection, and temporary grounded agent. |
 | `solution/03_cleanup.py` | Removes Lab 03 knowledge resources and optionally the index. |
 | `tests/test_lab_03_search.py` | Offline contract tests for the schema, query modes, and knowledge-object references. |
 
 The offline tests do not contact Azure or measure retrieval quality. They prove that the code constructs the expected SDK objects and query arguments.
 
-## Resource Recommendation
+## Workshop Resource Assumptions
 
 For this workshop, use:
 
-- **Region:** `Sweden Central` for both Microsoft Foundry and Azure AI Search.
 - **Search tier:** `Basic`.
 - **Embedding deployment:** `text-embedding-3-small` with its default 1,536 dimensions.
 
-`Sweden Central` currently supports Azure AI Search agentic retrieval and semantic ranker. Keeping Search and Foundry in one region also reduces latency and makes the workshop topology easier to reason about.
-
-Some supported regions expose agentic retrieval and semantic ranker on the Free tier, including Sweden Central. This lab still recommends **Basic** because its keyless flow uses the Search service's managed identity to invoke the embedding model. Microsoft's agentic-retrieval quickstart requires Basic or higher for managed identity support. Basic is a billable dedicated service, so delete it after the workshop if it is no longer needed.
-
-If your subscription cannot deploy the required chat and embedding models in Sweden Central, choose another region only after confirming all three capabilities there:
-
-1. Azure AI Search agentic retrieval.
-2. Azure AI Search semantic ranker.
-3. Capacity for the workshop's chat and embedding model deployments.
-
-Do not assume that general Azure AI Search availability implies Foundry IQ availability.
+The workshop environment is prepared before the lab, so participants do not select or deploy a region. Basic is a billable dedicated Search tier; the instructor owns service cleanup after the workshop.
 
 ## Prerequisites and Roles
 
@@ -207,6 +197,31 @@ Open `data/maintenance_documents.json` before running code. Find:
 
 The last two items are intentional. Retrieval relevance does not prove that a document is current, authoritative, or safe to follow.
 
+Each JSON object becomes one Search document. The fields have different jobs:
+
+| Field | Meaning in this lab | Search behavior |
+|---|---|---|
+| `id` | Stable document identifier, including procedure and revision where applicable. | The unique index key. |
+| `title` | Human-readable source name. | Searchable and prioritized as the semantic title. |
+| `content` | The evidence passage the assistant may retrieve. | Searchable, embedded into `content_vector`, and prioritized as semantic content. |
+| `document_type` | Procedure, guide, policy, or untrusted note. | Searchable, filterable, and facetable metadata. |
+| `asset_type` | Equipment scope, such as `centrifugal_pump`. | Searchable, filterable, and facetable metadata. |
+| `effective_date` | Date the source became effective. | Filterable and sortable; Search does not automatically prefer the newest date. |
+| `revision` | Source revision number. | Filterable and sortable; relevance alone does not enforce revision authority. |
+| `source_url` | Synthetic source location retained for citation. | Returned as citation metadata; the workshop URL is not a live procedure site. |
+| `content_vector` | Generated 1,536-number representation of title plus content. | Added during ingestion and used for vector similarity; it is not present in the source JSON. |
+
+The six records are deliberately small but not uniformly trustworthy:
+
+| Document | Why it is in the corpus | What learners should notice |
+|---|---|---|
+| `PROC-PUMP-017-R1` | Superseded pump procedure. | Exact words can rank highly even when the revision is obsolete. |
+| `PROC-PUMP-017-R3` | Current pump procedure. | Current evidence requires condition assessment and a qualified human decision. |
+| `GUIDE-PUMP-042-R2` | Inspection evidence guide. | It lists useful measurements but does not supply a universal shutdown threshold or torque. |
+| `POLICY-MRO-009-R4` | Inventory authority policy. | Stock visibility is not permission to reserve or issue a part. |
+| `PROC-COMP-008-R2` | Unrelated compressor procedure. | A valid procedure can still be irrelevant to the pump question. |
+| `NOTE-VENDOR-404` | Prompt-injection example embedded in retrieved text. | Retrieved content is untrusted data and cannot override agent instructions or grant authority. |
+
 ### Checkpoint 3: Build and Populate the Index
 
 Confirm that `AZURE_SEARCH_INDEX_NAME` starts with your assigned `RESOURCE_PREFIX` before running the build script. On a shared Search service, do not use the unsuffixed `opg-maintenance-documents` name.
@@ -279,8 +294,10 @@ Search question (or 'exit'): What is the exact coupling-bolt torque for ASSET-10
 Each question independently runs in all three modes. Type `exit` at a new prompt to stop. If you get stuck after attempting the TODOs, run the completed client:
 
 ```powershell
-python .\lab-03-search-grounding\solution\interactive_search.py
+python .\lab-03-search-grounding\solution\search_exercise.py
 ```
+
+Compare `starter/search_exercise.py` with `solution/search_exercise.py` for the direct answers to all three TODOs. `solution/interactive_search.py` is a second reference implementation that delegates the same query construction to `search_helpers.py`.
 
 #### Option B: Use Search Explorer in the Azure Portal
 
@@ -469,7 +486,7 @@ The command stops after Checkpoint 2. It does not create an agent or start the t
 2. Open the project identified by `FOUNDRY_PROJECT_ENDPOINT`.
 3. From the top menu, select **Build**.
 4. Select the **Knowledge** tab.
-5. Open the knowledge base named in `AZURE_SEARCH_KNOWLEDGE_BASE_NAME`.
+5. Open the participant-prefixed knowledge base printed by the script and stored in `AZURE_SEARCH_KNOWLEDGE_BASE_NAME`. For participant AP, the expected name is `opg26a-ap-maintenance-knowledge`; do not open or create the unsuffixed `opg-maintenance-knowledge` name.
 
 Inspect these components before creating the agent:
 

@@ -39,6 +39,37 @@ class ConfigurationChecksTests(unittest.TestCase):
         self.assertEqual([result.status for result in results], ["WARN", "WARN"])
         self.assertTrue(all(result.fix for result in results))
 
+    def test_lab_03_resource_names_must_match_the_participant_prefix(self) -> None:
+        environment = {
+            "RESOURCE_PREFIX": "opg26a-ap",
+            "AZURE_SEARCH_INDEX_NAME": "opg26a-ap-maintenance-documents",
+            "AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME": "opg26a-ap-maintenance-source",
+            "AZURE_SEARCH_KNOWLEDGE_BASE_NAME": "opg-maintenance-knowledge",
+            "FOUNDRY_IQ_CONNECTION_NAME": "opg26a-ap-maintenance-iq",
+            "FOUNDRY_GROUNDED_AGENT_NAME": "opg26a-ap-grounded-maintenance-agent",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            result = verify_setup.participant_resource_name_check()
+
+        self.assertEqual(result.status, "WARN")
+        self.assertIn("AZURE_SEARCH_KNOWLEDGE_BASE_NAME", result.detail)
+        self.assertIn("opg26a-ap-maintenance-knowledge", result.fix or "")
+
+    def test_lab_03_resource_names_pass_with_the_participant_prefix(self) -> None:
+        environment = {
+            "RESOURCE_PREFIX": "opg26a-ap",
+            "AZURE_SEARCH_INDEX_NAME": "opg26a-ap-maintenance-documents",
+            "AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME": "opg26a-ap-maintenance-source",
+            "AZURE_SEARCH_KNOWLEDGE_BASE_NAME": "opg26a-ap-maintenance-knowledge",
+            "FOUNDRY_IQ_CONNECTION_NAME": "opg26a-ap-maintenance-iq",
+            "FOUNDRY_GROUNDED_AGENT_NAME": "opg26a-ap-grounded-maintenance-agent",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            result = verify_setup.participant_resource_name_check()
+
+        self.assertEqual(result.status, "PASS")
+        self.assertEqual(result.detail, "all start with opg26a-ap-")
+
     def test_complete_configuration_passes(self) -> None:
         environment = {
             "FOUNDRY_PROJECT_ENDPOINT": "https://example.services.ai.azure.com/api/projects/team-01",

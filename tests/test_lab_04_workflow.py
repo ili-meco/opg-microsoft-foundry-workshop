@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -51,6 +53,22 @@ class SafetyWorkflowTests(unittest.TestCase):
         self.assertEqual(safety_workflow.parse_human_decision("reject"), "reject")
         with self.assertRaises(ValueError):
             safety_workflow.parse_human_decision("execute")
+
+    def test_assessment_package_copy_can_be_loaded(self) -> None:
+        package = {"request": "Review a copied unsafe variant."}
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            package_path = Path(temporary_directory) / "unsafe-variant.json"
+            package_path.write_text(json.dumps(package), encoding="utf-8")
+
+            self.assertEqual(safety_workflow.load_assessment_package(package_path), package)
+
+    def test_assessment_package_must_be_one_json_object(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            package_path = Path(temporary_directory) / "invalid-package.json"
+            package_path.write_text("[]", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "one JSON object"):
+                safety_workflow.load_assessment_package(package_path)
 
     def test_reviewer_instructions_require_exact_json_and_human_decision(self) -> None:
         instructions = safety_workflow.REVIEWER_INSTRUCTIONS

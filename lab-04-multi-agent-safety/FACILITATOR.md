@@ -52,10 +52,9 @@ python -m unittest tests.test_lab_04_approval tests.test_lab_04_workflow -v
 
 ## Live-Run Troubleshooting
 
-- Incorrect token audience: request `https://ai.azure.com/.default`.
-- `/v1` rejects `api-version`: pass the provider through `OpenAIChatClient(api_key=...)`.
-- Token string cannot be awaited: return the async wrapper from `foundry_token_provider()`.
+- Confirm the workflow uses `FoundryChatClient` with the project endpoint, model deployment name, and Azure credential.
 - Missing or expired token after checking code: rerun `az login`.
+- Invalid project endpoint: use the full endpoint ending in `/api/projects/<project-name>`.
 - HTTP 403: confirm access to the Foundry project and deployment.
 - Invalid reviewer JSON: inspect the raw final text and reinforce the JSON-only contract.
 - Deployment not found: use the deployment name, not the catalog model name.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+from pathlib import Path
 
 import requests
 from azure.ai.projects import AIProjectClient
@@ -23,6 +24,7 @@ from search_helpers import SEMANTIC_CONFIGURATION_NAME
 
 
 KNOWLEDGE_BASE_MCP_API_VERSION = "2026-04-01"
+WORKSPACE_ROOT = Path(__file__).parents[2]
 
 AGENT_INSTRUCTIONS = """You are an OPG maintenance evidence assistant using synthetic data.
 You must use knowledge_base_retrieve for every maintenance question and answer only from retrieved evidence.
@@ -38,6 +40,17 @@ def required_environment(variable: str) -> str:
     value = os.getenv(variable, "").strip()
     if not value or "<" in value or ">" in value:
         raise RuntimeError(f"Set {variable} in the repository .env file.")
+    return value
+
+
+def required_participant_resource(variable: str) -> str:
+    prefix = required_environment("RESOURCE_PREFIX")
+    value = required_environment(variable)
+    if not value.startswith(f"{prefix}-"):
+        raise RuntimeError(
+            f"{variable} must start with '{prefix}-' to avoid changing another "
+            "participant's resources."
+        )
     return value
 
 
@@ -136,21 +149,19 @@ def main() -> None:
         help="Create the knowledge objects and project connection, then stop for portal setup.",
     )
     args = parser.parse_args()
-    load_dotenv()
+    load_dotenv(WORKSPACE_ROOT / ".env", override=True)
 
     project_endpoint = required_environment("FOUNDRY_PROJECT_ENDPOINT")
     project_resource_id = required_environment("FOUNDRY_PROJECT_RESOURCE_ID")
     model_name = required_environment("FOUNDRY_MODEL_NAME")
     search_endpoint = required_environment("AZURE_SEARCH_ENDPOINT")
-    index_name = os.getenv("AZURE_SEARCH_INDEX_NAME", "opg-maintenance-documents")
-    knowledge_source_name = os.getenv(
-        "AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME", "opg-maintenance-source"
+    index_name = required_participant_resource("AZURE_SEARCH_INDEX_NAME")
+    knowledge_source_name = required_participant_resource(
+        "AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME"
     )
-    knowledge_base_name = os.getenv(
-        "AZURE_SEARCH_KNOWLEDGE_BASE_NAME", "opg-maintenance-knowledge"
-    )
-    connection_name = os.getenv("FOUNDRY_IQ_CONNECTION_NAME", "opg-maintenance-iq")
-    agent_name = os.getenv("FOUNDRY_GROUNDED_AGENT_NAME", "opg-grounded-maintenance-agent")
+    knowledge_base_name = required_participant_resource("AZURE_SEARCH_KNOWLEDGE_BASE_NAME")
+    connection_name = required_participant_resource("FOUNDRY_IQ_CONNECTION_NAME")
+    agent_name = required_participant_resource("FOUNDRY_GROUNDED_AGENT_NAME")
     mcp_endpoint = build_mcp_endpoint(search_endpoint, knowledge_base_name)
 
     with (

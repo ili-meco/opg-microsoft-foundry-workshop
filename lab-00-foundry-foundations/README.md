@@ -163,7 +163,7 @@ The fastest or largest model is not automatically the best choice. Select the le
 - [ ] The starter script authenticates without an API key.
 - [ ] At least one model returns a maintenance assessment.
 - [ ] The response identifies assumptions instead of presenting unsupported facts.
-- [ ] You can explain one quality, latency, or cost tradeoff in model selection.
+- [ ] You can explain the observed latency difference between the model deployments.
 
 ## Bonus Challenge
 

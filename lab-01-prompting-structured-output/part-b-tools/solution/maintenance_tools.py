@@ -11,48 +11,6 @@ ASSET_ID_PATTERN = re.compile(r"^ASSET-[0-9]{3}$")
 PART_NUMBER_PATTERN = re.compile(r"^PART-[0-9]{3}$")
 
 
-TOOL_DEFINITIONS = [
-    {
-        "name": "get_asset",
-        "description": (
-            "Look up the current master-data record for one maintenance asset by its "
-            "asset ID. This tool is read-only."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "asset_id": {
-                    "type": "string",
-                    "description": "Asset identifier in the format ASSET-100.",
-                    "pattern": "^ASSET-[0-9]{3}$",
-                }
-            },
-            "required": ["asset_id"],
-            "additionalProperties": False,
-        },
-    },
-    {
-        "name": "get_parts_inventory",
-        "description": (
-            "Look up current stock and replenishment information for one maintenance "
-            "part number. This tool is read-only."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "part_number": {
-                    "type": "string",
-                    "description": "Part identifier in the format PART-200.",
-                    "pattern": "^PART-[0-9]{3}$",
-                }
-            },
-            "required": ["part_number"],
-            "additionalProperties": False,
-        },
-    },
-]
-
-
 def _load_records(file_name: str, key: str) -> dict[str, dict[str, Any]]:
     with (DATA_DIRECTORY / file_name).open(encoding="utf-8") as data_file:
         records = json.load(data_file)

@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 MINIMUM_PYTHON = (3, 11)
 REQUIRED_MODULES = {
@@ -31,6 +32,14 @@ LAB_03_ENVIRONMENT = (
     "AZURE_SEARCH_ENDPOINT",
     "FOUNDRY_EMBEDDING_ENDPOINT",
     "FOUNDRY_EMBEDDING_MODEL_NAME",
+    "RESOURCE_PREFIX",
+)
+LAB_03_RESOURCE_NAMES = (
+    "AZURE_SEARCH_INDEX_NAME",
+    "AZURE_SEARCH_KNOWLEDGE_SOURCE_NAME",
+    "AZURE_SEARCH_KNOWLEDGE_BASE_NAME",
+    "FOUNDRY_IQ_CONNECTION_NAME",
+    "FOUNDRY_GROUNDED_AGENT_NAME",
 )
 ENVIRONMENT_FIXES = {
     "FOUNDRY_PROJECT_ENDPOINT": (
@@ -56,6 +65,10 @@ ENVIRONMENT_FIXES = {
     "FOUNDRY_EMBEDDING_MODEL_NAME": (
         "In .env, set FOUNDRY_EMBEDDING_MODEL_NAME to the embedding model deployment "
         "name in Foundry."
+    ),
+    "RESOURCE_PREFIX": (
+        "Run this check from your generated participant workspace and keep its "
+        "RESOURCE_PREFIX value, such as opg26a-ap, in .env."
     ),
 }
 
@@ -131,7 +144,7 @@ def load_environment_file() -> None:
     if module_available("dotenv"):
         from dotenv import load_dotenv
 
-        load_dotenv()
+        load_dotenv(Path(__file__).parents[1] / ".env", override=True)
 
 
 def configuration_checks(
@@ -153,6 +166,32 @@ def configuration_checks(
             )
         )
     return results
+
+
+def participant_resource_name_check() -> CheckResult:
+    prefix = os.getenv("RESOURCE_PREFIX", "").strip()
+    expected_prefix = f"{prefix}-" if prefix else ""
+    invalid_names = [
+        variable
+        for variable in LAB_03_RESOURCE_NAMES
+        if not expected_prefix
+        or not os.getenv(variable, "").strip().startswith(expected_prefix)
+    ]
+    if invalid_names:
+        detail = "invalid or missing: " + ", ".join(invalid_names)
+        return CheckResult(
+            "Lab 03 participant resource names",
+            "WARN",
+            detail,
+            "Use the generated values in this participant workspace's .env. Every Lab 03 "
+            "resource name must start with RESOURCE_PREFIX plus '-', for example "
+            "opg26a-ap-maintenance-knowledge. Do not use unsuffixed opg-maintenance names.",
+        )
+    return CheckResult(
+        "Lab 03 participant resource names",
+        "PASS",
+        f"all start with {expected_prefix}",
+    )
 
 
 def azure_login_check() -> CheckResult:
@@ -211,6 +250,8 @@ def main() -> int:
     load_environment_file()
     configuration = REQUIRED_ENVIRONMENT + (LAB_03_ENVIRONMENT if args.lab_03 else ())
     results = [*local_checks(), *configuration_checks(configuration)]
+    if args.lab_03:
+        results.append(participant_resource_name_check())
     if args.azure:
         results.append(azure_login_check())
 

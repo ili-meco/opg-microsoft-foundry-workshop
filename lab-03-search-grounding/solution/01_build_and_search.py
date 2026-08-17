@@ -22,6 +22,7 @@ from search_helpers import (
 
 DATA_PATH = Path(__file__).parents[1] / "data" / "maintenance_documents.json"
 DEFAULT_QUERY = "What should happen when pump vibration rises and the seal starts leaking?"
+WORKSPACE_ROOT = Path(__file__).parents[2]
 
 
 def required_environment(variable: str) -> str:
@@ -31,14 +32,25 @@ def required_environment(variable: str) -> str:
     return value
 
 
+def required_participant_resource(variable: str) -> str:
+    prefix = required_environment("RESOURCE_PREFIX")
+    value = required_environment(variable)
+    if not value.startswith(f"{prefix}-"):
+        raise RuntimeError(
+            f"{variable} must start with '{prefix}-' to avoid changing another "
+            "participant's resources."
+        )
+    return value
+
+
 def main() -> None:
-    load_dotenv()
+    load_dotenv(WORKSPACE_ROOT / ".env", override=True)
     search_endpoint = required_environment("AZURE_SEARCH_ENDPOINT")
     embedding_endpoint = required_environment("FOUNDRY_EMBEDDING_ENDPOINT")
     embedding_deployment = required_environment("FOUNDRY_EMBEDDING_MODEL_NAME")
     embedding_model = os.getenv("FOUNDRY_EMBEDDING_MODEL", "text-embedding-3-small")
     embedding_dimensions = int(os.getenv("FOUNDRY_EMBEDDING_DIMENSIONS", "1536"))
-    index_name = os.getenv("AZURE_SEARCH_INDEX_NAME", "opg-maintenance-documents")
+    index_name = required_participant_resource("AZURE_SEARCH_INDEX_NAME")
 
     with DefaultAzureCredential() as credential:
         token_provider = get_bearer_token_provider(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -28,6 +29,30 @@ assert IQ_SPEC and IQ_SPEC.loader
 foundry_iq_agent = importlib.util.module_from_spec(IQ_SPEC)
 sys.modules[IQ_SPEC.name] = foundry_iq_agent
 IQ_SPEC.loader.exec_module(foundry_iq_agent)
+
+EXERCISE_SPEC = importlib.util.spec_from_file_location(
+    "search_exercise_solution", SOLUTION_DIRECTORY / "search_exercise.py"
+)
+assert EXERCISE_SPEC and EXERCISE_SPEC.loader
+search_exercise_solution = importlib.util.module_from_spec(EXERCISE_SPEC)
+sys.modules[EXERCISE_SPEC.name] = search_exercise_solution
+EXERCISE_SPEC.loader.exec_module(search_exercise_solution)
+
+BUILD_SPEC = importlib.util.spec_from_file_location(
+    "build_and_search", SOLUTION_DIRECTORY / "01_build_and_search.py"
+)
+assert BUILD_SPEC and BUILD_SPEC.loader
+build_and_search = importlib.util.module_from_spec(BUILD_SPEC)
+sys.modules[BUILD_SPEC.name] = build_and_search
+BUILD_SPEC.loader.exec_module(build_and_search)
+
+CLEANUP_SPEC = importlib.util.spec_from_file_location(
+    "search_cleanup", SOLUTION_DIRECTORY / "03_cleanup.py"
+)
+assert CLEANUP_SPEC and CLEANUP_SPEC.loader
+search_cleanup = importlib.util.module_from_spec(CLEANUP_SPEC)
+sys.modules[CLEANUP_SPEC.name] = search_cleanup
+CLEANUP_SPEC.loader.exec_module(search_cleanup)
 
 
 class SearchSchemaTests(unittest.TestCase):
@@ -100,6 +125,21 @@ class SearchSchemaTests(unittest.TestCase):
 
 
 class QueryModeTests(unittest.TestCase):
+    def test_completed_exercise_builds_all_three_query_modes(self) -> None:
+        keyword = search_exercise_solution.build_keyword_query("seal leak", top=5)
+        vector = search_exercise_solution.build_vector_query("seal leak", top=5)
+        hybrid = search_exercise_solution.build_hybrid_query("seal leak", top=5)
+
+        self.assertEqual(keyword, {"search_text": "seal leak", "top": 5})
+        self.assertIsNone(vector["search_text"])
+        self.assertEqual(vector["vector_queries"][0].k_nearest_neighbors, 5)
+        self.assertEqual(hybrid["search_text"], "seal leak")
+        self.assertEqual(hybrid["query_type"], "semantic")
+        self.assertEqual(
+            hybrid["semantic_configuration_name"],
+            search_exercise_solution.SEMANTIC_CONFIGURATION_NAME,
+        )
+
     def test_keyword_query_has_no_vector(self) -> None:
         arguments = search_helpers.build_query_arguments("seal leak", "keyword")
 
@@ -147,6 +187,43 @@ class QueryModeTests(unittest.TestCase):
 
 
 class InteractiveAgentTests(unittest.TestCase):
+    def test_all_mutating_scripts_reject_generic_resource_names(self) -> None:
+        environment = {
+            "RESOURCE_PREFIX": "opg26a-ap",
+            "AZURE_SEARCH_INDEX_NAME": "opg-maintenance-documents",
+            "AZURE_SEARCH_KNOWLEDGE_BASE_NAME": "opg-maintenance-knowledge",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            with self.assertRaisesRegex(RuntimeError, "must start with 'opg26a-ap-'"):
+                build_and_search.required_participant_resource("AZURE_SEARCH_INDEX_NAME")
+            with self.assertRaisesRegex(RuntimeError, "must start with 'opg26a-ap-'"):
+                foundry_iq_agent.required_participant_resource(
+                    "AZURE_SEARCH_KNOWLEDGE_BASE_NAME"
+                )
+            with self.assertRaisesRegex(RuntimeError, "must start with 'opg26a-ap-'"):
+                search_cleanup.required_participant_resource(
+                    "AZURE_SEARCH_KNOWLEDGE_BASE_NAME"
+                )
+
+    def test_foundry_iq_resources_require_the_participant_prefix(self) -> None:
+        environment = {
+            "RESOURCE_PREFIX": "opg26a-ap",
+            "AZURE_SEARCH_KNOWLEDGE_BASE_NAME": "opg26a-ap-maintenance-knowledge",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            self.assertEqual(
+                foundry_iq_agent.required_participant_resource(
+                    "AZURE_SEARCH_KNOWLEDGE_BASE_NAME"
+                ),
+                "opg26a-ap-maintenance-knowledge",
+            )
+
+            os.environ["AZURE_SEARCH_KNOWLEDGE_BASE_NAME"] = "opg-maintenance-knowledge"
+            with self.assertRaisesRegex(RuntimeError, "must start with 'opg26a-ap-'"):
+                foundry_iq_agent.required_participant_resource(
+                    "AZURE_SEARCH_KNOWLEDGE_BASE_NAME"
+                )
+
     def test_mcp_endpoint_uses_ga_minimal_retrieval(self) -> None:
         endpoint = foundry_iq_agent.build_mcp_endpoint(
             "https://workshop.search.windows.net/",

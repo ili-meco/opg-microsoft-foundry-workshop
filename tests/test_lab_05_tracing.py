@@ -13,6 +13,7 @@ SOLUTION_FILE = (
     / "solution"
     / "tracing_setup.py"
 )
+RUNNER_FILE = SOLUTION_FILE.with_name("run_traced_workflow.py")
 
 
 def load_module(name: str, path: Path):
@@ -25,6 +26,7 @@ def load_module(name: str, path: Path):
 
 
 tracing_setup = load_module("tracing_setup", SOLUTION_FILE)
+run_traced_workflow = load_module("run_traced_workflow", RUNNER_FILE)
 
 
 class TracingSetupTests(unittest.TestCase):
@@ -48,6 +50,27 @@ class TracingSetupTests(unittest.TestCase):
             vs_code_extension_port=5000,
             enable_sensitive_data=True,
         )
+
+    def test_detects_when_trace_receiver_is_unavailable(self) -> None:
+        with patch.object(
+            run_traced_workflow.socket,
+            "create_connection",
+            side_effect=ConnectionRefusedError,
+        ):
+            self.assertFalse(run_traced_workflow.trace_receiver_is_running())
+
+    def test_detects_when_trace_receiver_is_running(self) -> None:
+        connection = unittest.mock.MagicMock()
+        with patch.object(
+            run_traced_workflow.socket,
+            "create_connection",
+            return_value=connection,
+        ) as create_connection:
+            self.assertTrue(run_traced_workflow.trace_receiver_is_running())
+
+        create_connection.assert_called_once_with(("localhost", 4317), timeout=1.0)
+        connection.__enter__.assert_called_once_with()
+        connection.__exit__.assert_called_once()
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.responses.response_input_param import FunctionCallOutput, ResponseInputParam
 
-from maintenance_tools import TOOL_DEFINITIONS, execute_tool
+from maintenance_tools import execute_tool
 
 
 AGENT_NAME = "opg-maintenance-tool-agent"
@@ -24,13 +24,20 @@ Treat not_found and error tool results as missing evidence and say what could no
 You have read-only tools: never claim to update a work order, reserve stock, or control equipment.
 State the evidence you found and give a cautious planner recommendation.
 """
-
-
-def required_environment(variable: str) -> str:
-    value = os.getenv(variable, "").strip()
-    if not value or value.startswith("<") or "<account>" in value:
-        raise RuntimeError(f"Set {variable} in the repository .env file.")
-    return value
+TOOL_DEFINITIONS = [
+    {
+        "name": "get_asset",
+        "description": "Look up one maintenance asset by asset ID. Read-only.",
+        "parameter_name": "asset_id",
+        "pattern": "^ASSET-[0-9]{3}$",
+    },
+    {
+        "name": "get_parts_inventory",
+        "description": "Look up stock information for one part number. Read-only.",
+        "parameter_name": "part_number",
+        "pattern": "^PART-[0-9]{3}$",
+    },
+]
 
 
 def build_function_tools() -> list[Tool]:
@@ -38,7 +45,17 @@ def build_function_tools() -> list[Tool]:
         FunctionTool(
             name=definition["name"],
             description=definition["description"],
-            parameters=definition["parameters"],
+            parameters={
+                "type": "object",
+                "properties": {
+                    definition["parameter_name"]: {
+                        "type": "string",
+                        "pattern": definition["pattern"],
+                    }
+                },
+                "required": [definition["parameter_name"]],
+                "additionalProperties": False,
+            },
             strict=True,
         )
         for definition in TOOL_DEFINITIONS
@@ -73,6 +90,13 @@ def resolve_function_calls(response_output: list[Any]) -> ResponseInputParam:
             )
         )
     return tool_outputs
+
+
+def required_environment(variable: str) -> str:
+    value = os.getenv(variable, "").strip()
+    if not value or value.startswith("<") or "<account>" in value:
+        raise RuntimeError(f"Set {variable} in the repository .env file.")
+    return value
 
 
 def invoke_agent(
