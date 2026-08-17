@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import os
 import sys
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -35,6 +37,7 @@ class ConfigurationChecksTests(unittest.TestCase):
             results = verify_setup.configuration_checks()
 
         self.assertEqual([result.status for result in results], ["WARN", "WARN"])
+        self.assertTrue(all(result.fix for result in results))
 
     def test_complete_configuration_passes(self) -> None:
         environment = {
@@ -62,6 +65,83 @@ class ConfigurationChecksTests(unittest.TestCase):
 class ModuleChecksTests(unittest.TestCase):
     def test_missing_parent_package_is_reported_as_unavailable(self) -> None:
         self.assertFalse(verify_setup.module_available("package_that_does_not_exist.child"))
+
+    def test_every_local_failure_has_a_fix(self) -> None:
+        with (
+            patch.object(verify_setup, "MINIMUM_PYTHON", (99, 0)),
+            patch.object(verify_setup.sys, "prefix", "same-prefix"),
+            patch.object(verify_setup.sys, "base_prefix", "same-prefix"),
+            patch.object(verify_setup.shutil, "which", return_value=None),
+            patch.object(verify_setup, "module_available", return_value=False),
+        ):
+            results = verify_setup.local_checks()
+
+        self.assertTrue(all(result.status != "PASS" for result in results))
+        self.assertTrue(all(result.fix for result in results))
+
+
+class RemediationCoverageTests(unittest.TestCase):
+    def test_every_environment_warning_has_a_fix(self) -> None:
+        variables = verify_setup.REQUIRED_ENVIRONMENT + verify_setup.LAB_03_ENVIRONMENT
+        with patch.dict(os.environ, {}, clear=True):
+            results = verify_setup.configuration_checks(variables)
+
+        self.assertTrue(all(result.status == "WARN" for result in results))
+        self.assertTrue(all(result.fix for result in results))
+
+    def test_azure_sign_in_failure_has_a_fix(self) -> None:
+        with patch.object(
+            verify_setup.subprocess,
+            "run",
+            side_effect=FileNotFoundError("az not found"),
+        ):
+            result = verify_setup.azure_login_check()
+
+        self.assertEqual(result.status, "FAIL")
+        self.assertIn("az login", result.fix or "")
+
+
+class ResultOutputTests(unittest.TestCase):
+    def test_non_passing_check_prints_its_fix(self) -> None:
+        results = [
+            verify_setup.CheckResult(
+                "Azure CLI",
+                "FAIL",
+                "not found on PATH",
+                "Install Azure CLI, then restart the terminal.",
+            )
+        ]
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            verify_setup.print_results(results)
+
+        self.assertEqual(
+            output.getvalue().splitlines(),
+            [
+                "[FAIL] Azure CLI: not found on PATH",
+                "       [FIX] Install Azure CLI, then restart the terminal.",
+            ],
+        )
+
+    def test_warning_prints_fix_but_pass_does_not(self) -> None:
+        results = [
+            verify_setup.CheckResult("Python", "PASS", "3.12.10", "Reinstall Python."),
+            verify_setup.CheckResult(
+                "FOUNDRY_MODEL_NAME",
+                "WARN",
+                "not configured yet",
+                "Set FOUNDRY_MODEL_NAME in .env.",
+            ),
+        ]
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            verify_setup.print_results(results)
+
+        self.assertEqual(output.getvalue().count("[FIX]"), 1)
+        self.assertNotIn("Reinstall Python", output.getvalue())
+        self.assertIn("Set FOUNDRY_MODEL_NAME in .env.", output.getvalue())
 
 
 class ModelRequestTests(unittest.TestCase):
