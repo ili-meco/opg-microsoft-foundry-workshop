@@ -309,6 +309,8 @@ This request searches the text fields. Select **Search**, record the order of th
 **Vector request:**
 
 ```json
+![Azure AI Search explorer in JSON view.](../images/search.png)
+
 {
   "vectorQueries": [
     {

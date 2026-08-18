@@ -309,6 +309,8 @@ You can run the same comparison without Python after `01_build_and_search.py` ha
 4. Select the **Search explorer** tab.
 5. Select **View** > **JSON view**.
 
+![Azure AI Search explorer in JSON view.](../images/search.png)
+
 Use the same question in all three requests. Paste and run **one JSON request at a time** so you can compare three separate responses.
 
 **Keyword request:**
